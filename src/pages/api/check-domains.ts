@@ -44,21 +44,37 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    // Initialize checker
+    // Initialize checker with log collection
+    const logs: Array<{message: string, type: string, timestamp: number}> = [];
     const checker = new NamecheapBeastModeChecker();
+    
+    // Set up log callback to collect logs
+    checker.setLogCallback((message, type = 'info') => {
+      logs.push({ message, type, timestamp: Date.now() });
+    });
+
+    logs.push({ message: '🚀 Initializing Beast Mode protocol...', type: 'system', timestamp: Date.now() });
+    logs.push({ message: '🔧 Launching headless browser...', type: 'info', timestamp: Date.now() });
+    
     await checker.init();
+    
+    logs.push({ message: '✓ Browser instance ready', type: 'success', timestamp: Date.now() });
+    logs.push({ message: `📋 Loaded ${domains.length} domains for scanning`, type: 'info', timestamp: Date.now() });
 
     // Check domains
     const results = await checker.checkDomains(domains);
 
     // Close browser
+    logs.push({ message: '🔒 Closing browser session...', type: 'info', timestamp: Date.now() });
     await checker.close();
+    logs.push({ message: '✓ Session terminated. Memory cleared.', type: 'success', timestamp: Date.now() });
 
     return new Response(
       JSON.stringify({ 
         success: true,
         total: domains.length,
-        results 
+        results,
+        logs
       }), 
       { 
         status: 200, 

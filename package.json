@@ -22,10 +22,12 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "start": "astro dev"
+    "start": "astro dev",
+    "cli": "tsx cli.js"
   },
   "dependencies": {
     "@astrojs/node": "^9.1.3",
+    "@astrojs/vercel": "^9.0.4",
     "astro": "^5.16.15",
     "csv-parse": "^6.1.0",
     "puppeteer": "^24.36.0"
@@ -35,7 +37,8 @@
     "@tailwindcss/forms": "^0.5.11",
     "@types/node": "^25.0.10",
     "autoprefixer": "^10.4.23",
-    "tailwindcss": "^3.4.19"
+    "tailwindcss": "^3.4.19",
+    "tsx": "^4.21.0"
   },
   "engines": {
     "node": ">=18.0.0"

@@ -161,10 +161,14 @@ const title = "Beast Domain Checker";
         <div class="main-tab-content hidden" data-tab="results" role="tabpanel">
           <h2 class="text-xl font-bold mb-6 text-primary-500">$ ./scan_output</h2>
 
-          <div id="loadingState" class="hidden flex flex-col items-center justify-center min-h-[300px] rounded bg-dark-600/50">
-            <div class="inline-block w-12 h-12 border-2 border-primary-500/30 border-t-primary-500 rounded-full animate-spin mb-4"></div>
-            <p class="text-lg font-semibold text-primary-500">[ SCANNING... ]</p>
-            <p class="text-sm text-primary-500/70 mt-2">// executing domain lookup</p>
+          <div id="loadingState" class="hidden min-h-[400px] rounded bg-dark-600/50">
+            <div class="flex items-center gap-2 border-b border-primary-500/20 px-4 py-3">
+              <div class="inline-block w-3 h-3 border-2 border-primary-500/30 border-t-primary-500 rounded-full animate-spin"></div>
+              <p class="text-sm font-semibold text-primary-500">[ SYSTEM_ACTIVE ]</p>
+            </div>
+            <div id="cliLogs" class="p-4 font-mono text-xs sm:text-sm space-y-1 max-h-[500px] overflow-y-auto">
+              <!-- CLI logs will appear here -->
+            </div>
           </div>
 
           <div id="resultsContent" class="hidden">
@@ -210,6 +214,52 @@ const title = "Beast Domain Checker";
     let currentResults = [];
     let favCurrentPage = 1;
     const favItemsPerPage = 12; // 3x4 or 4x3 grid
+
+    // ===== CLI Logging System =====
+    function addCliLog(message, type = 'info') {
+      const cliLogs = document.getElementById('cliLogs');
+      if (!cliLogs) return;
+
+      const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
+      const logEntry = document.createElement('div');
+      logEntry.className = 'flex gap-2 items-start';
+      
+      let color = 'text-primary-500/70';
+      let prefix = '>';
+      
+      switch(type) {
+        case 'success':
+          color = 'text-green-500';
+          prefix = '✓';
+          break;
+        case 'error':
+          color = 'text-red-500';
+          prefix = '✗';
+          break;
+        case 'warning':
+          color = 'text-yellow-500';
+          prefix = '⚠';
+          break;
+        case 'system':
+          color = 'text-primary-500';
+          prefix = '$';
+          break;
+      }
+      
+      logEntry.innerHTML = `
+        <span class="text-primary-500/50">[${timestamp}]</span>
+        <span class="${color}">${prefix}</span>
+        <span class="${color}">${message}</span>
+      `;
+      
+      cliLogs.appendChild(logEntry);
+      cliLogs.scrollTop = cliLogs.scrollHeight;
+    }
+
+    function clearCliLogs() {
+      const cliLogs = document.getElementById('cliLogs');
+      if (cliLogs) cliLogs.innerHTML = '';
+    }
 
     // ===== localStorage Management =====
     const STORAGE_KEYS = {
@@ -658,12 +708,12 @@ const title = "Beast Domain Checker";
       }
     });
 
-    // Form submission
+    // Form submission with Server-Sent Events for real-time logs
     document.getElementById('checkForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const formData = new FormData(e.target);
-      const submitBtn = document.getElementById('submitBtn');
+      const form = e.target as HTMLFormElement;
+      const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement;
       const loadingState = document.getElementById('loadingState');
       const resultsContent = document.getElementById('resultsContent');
       const emptyResults = document.getElementById('emptyResults');
@@ -671,31 +721,116 @@ const title = "Beast Domain Checker";
       // Switch to results tab and show loading
       activateMainTab('results');
       
+      // Clear previous results and logs
+      currentResults = [];
+      clearCliLogs();
       loadingState?.classList.remove('hidden');
       resultsContent?.classList.add('hidden');
       emptyResults?.classList.add('hidden');
       submitBtn.disabled = true;
 
       try {
-        const response = await fetch('/api/check-domains', {
+        // Get domains from either file or textarea
+        let domainsText = '';
+        
+        const activeInput = document.querySelector('.input-tab.active')?.getAttribute('data-input');
+        
+        if (activeInput === 'upload') {
+          const savedInput = getSavedInput();
+          domainsText = savedInput?.domains || '';
+          if (!domainsText) {
+            throw new Error('Please upload a file first');
+          }
+        } else {
+          const textarea = document.getElementById('domainsInput') as HTMLTextAreaElement;
+          domainsText = textarea?.value || '';
+          if (!domainsText) {
+            throw new Error('Please enter domains');
+          }
+        }
+
+        // Prepare form data with domains as text
+        const formData = new FormData();
+        formData.append('domains', domainsText);
+
+        addCliLog('📡 Establishing connection to server...', 'info');
+
+        // Use fetch to POST data and get streaming response
+        const response = await fetch('/api/check-domains-stream', {
           method: 'POST',
           body: formData
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
-          throw new Error(data.error || 'Failed to check domains');
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to connect to server');
         }
 
-        currentResults = data.results;
-        saveResults(data.results); // Save to localStorage
-        displayResults(data);
+        if (!response.body) {
+          throw new Error('Server did not return a stream');
+        }
+
+        clearCliLogs();
+        addCliLog('✓ Connected. Listening for updates...', 'success');
+
+        // Read Server-Sent Events stream
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (!line.trim()) continue;
+
+            const eventMatch = line.match(/^event: (\w+)\ndata: (.+)$/s);
+            if (!eventMatch) continue;
+
+            const [, eventType, dataStr] = eventMatch;
+            const data = JSON.parse(dataStr);
+
+            if (eventType === 'log') {
+              addCliLog(data.message, data.type);
+            } else if (eventType === 'results') {
+              currentResults = data.results;
+              saveResults(data.results);
+              
+              // Add completion separator and message
+              await new Promise(r => setTimeout(r, 300));
+              addCliLog('═'.repeat(50), 'system');
+              
+              const stats = {
+                available: data.results.filter(r => r.status === 'available').length,
+                premium: data.results.filter(r => r.status === 'premium').length,
+                taken: data.results.filter(r => r.status === 'taken').length
+              };
+              
+              await new Promise(r => setTimeout(r, 200));
+              addCliLog(`✓ Scan complete: ${stats.available} available, ${stats.premium} premium, ${stats.taken} taken`, 'success');
+              addCliLog('═'.repeat(50), 'system');
+              
+              // Wait before showing results
+              await new Promise(r => setTimeout(r, 800));
+              displayResults(data);
+            } else if (eventType === 'error') {
+              throw new Error(data.message);
+            }
+          }
+        }
 
       } catch (error) {
-        alert('Error: ' + error.message);
+        addCliLog('✗ CRITICAL ERROR: ' + (error as Error).message, 'error');
+        addCliLog('⚠ Operation aborted', 'warning');
         emptyResults?.classList.remove('hidden');
       } finally {
+        await new Promise(r => setTimeout(r, 500));
         loadingState?.classList.add('hidden');
         submitBtn.disabled = false;
       }
@@ -828,8 +963,16 @@ const title = "Beast Domain Checker";
         });
       }
 
+      // Smooth fade-in transition
+      resultsContent?.classList.add('opacity-0');
       resultsContent?.classList.remove('hidden');
       emptyResults?.classList.add('hidden');
+      
+      // Trigger fade-in animation
+      requestAnimationFrame(() => {
+        resultsContent?.classList.remove('opacity-0');
+        resultsContent?.classList.add('opacity-100');
+      });
     }
 
     // Note: Remove favorites listeners are now attached in updateFavoritesDisplay() function

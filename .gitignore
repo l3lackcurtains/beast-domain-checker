@@ -56,3 +56,8 @@ test-*.html
 # Generated reports
 *-results.html
 *-results.json
+
+# Test files and results
+test-domains.txt
+results.csv
+domains-*.csv

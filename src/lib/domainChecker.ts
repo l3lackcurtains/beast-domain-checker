@@ -17,6 +17,21 @@ export interface DomainResult {
 export class NamecheapBeastModeChecker {
   private browser: Browser | null = null;
   private page: Page | null = null;
+  private logCallback: ((message: string, type?: string) => void) | null = null;
+
+  setLogCallback(callback: (message: string, type?: string) => void) {
+    this.logCallback = callback;
+  }
+
+  private log(message: string, type: string = 'info') {
+    // Only log to console if no callback is set (CLI mode)
+    if (!this.logCallback) {
+      console.log(message);
+    } else {
+      // Send to callback (web mode)
+      this.logCallback(message, type);
+    }
+  }
 
   async init() {
     this.browser = await puppeteer.launch({
@@ -47,7 +62,7 @@ export class NamecheapBeastModeChecker {
     const results: DomainResult[] = [];
 
     try {
-      console.log("Navigating to Beast Mode...");
+      this.log("🌐 Establishing secure connection to Namecheap Beast Mode...", 'system');
       await this.page.goto(
         "https://www.namecheap.com/domains/registration/results/?type=beast&domain=",
         {
@@ -57,12 +72,14 @@ export class NamecheapBeastModeChecker {
       );
 
       await delay(5000);
+      this.log("✓ Connection established. Interface ready.", 'success');
 
       const batchSize = 1000; // Namecheap Beast Mode supports up to 1000 domains
       for (let i = 0; i < domains.length; i += batchSize) {
         const batch = domains.slice(i, i + batchSize);
-        console.log(
-          `Checking batch ${i / batchSize + 1}: ${batch.length} domains`
+        this.log(
+          `⚡ Initiating scan protocol: ${batch.length} domains queued`,
+          'info'
         );
         const batchResults = await this.checkBatch(batch);
         results.push(...batchResults);
@@ -74,7 +91,7 @@ export class NamecheapBeastModeChecker {
 
       return results;
     } catch (error) {
-      console.error("Error checking domains:", error);
+      this.log(`✗ Error checking domains: ${error}`, 'error');
       throw error;
     }
   }
@@ -92,9 +109,11 @@ export class NamecheapBeastModeChecker {
       const csvPath = path.join(tmpDir, `domains-${Date.now()}.csv`);
       const csvContent = domains.join("\n");
       fs.writeFileSync(csvPath, csvContent);
+      this.log(`📝 Generated payload file: ${domains.length} targets`, 'info');
 
       // Click "Import CSV file" button
       try {
+        this.log('🎯 Locating import interface...', 'info');
         await this.page.waitForFunction(() => {
           const buttons = Array.from(document.querySelectorAll('button'));
           return buttons.some(b => b.textContent?.includes('Import CSV file'));
@@ -108,12 +127,14 @@ export class NamecheapBeastModeChecker {
           }
         });
         await delay(1500);
+        this.log('✓ Import dialog intercepted', 'success');
       } catch (e) {
         throw new Error("Failed to open Import CSV dialog: " + e);
       }
 
       // Upload file using Puppeteer's file input handling
       try {
+        this.log('⬆️ Uploading payload to Beast Mode servers...', 'info');
         const fileInputSelector = 'input[type="file"]';
         await this.page.waitForSelector(fileInputSelector, { timeout: 5000 });
         
@@ -124,6 +145,7 @@ export class NamecheapBeastModeChecker {
         
         await fileInput.uploadFile(csvPath);
         await delay(1000);
+        this.log('✓ Upload complete. Verifying data integrity...', 'success');
         
         // Wait for Import button (inside dialog) to become enabled
         await this.page.waitForFunction(() => {
@@ -156,6 +178,7 @@ export class NamecheapBeastModeChecker {
         
         await delay(3000);
         
+        this.log('🔎 Verifying injection success...', 'info');
         // Verify domains were added
         const domainButtonsCount = await this.page.evaluate(() => {
           const buttons = Array.from(document.querySelectorAll('button'));
@@ -174,6 +197,8 @@ export class NamecheapBeastModeChecker {
             throw new Error("Import dialog still open - import may have failed");
           }
         }
+        
+        this.log(`✓ Injection verified: ${domains.length} domains loaded into system`, 'success');
       } catch (e) {
         throw new Error("CSV upload failed: " + (e instanceof Error ? e.message : String(e)));
       }
@@ -182,6 +207,7 @@ export class NamecheapBeastModeChecker {
       fs.unlinkSync(csvPath);
 
       // Click Generate button
+      this.log('⚡ Triggering Beast Mode execution...', 'info');
       const generateBtnFound = await this.page.evaluate(() => {
         const buttons = Array.from(document.querySelectorAll('button'));
         const generateBtn = buttons.find(b => b.textContent?.includes('Generate'));
@@ -196,7 +222,8 @@ export class NamecheapBeastModeChecker {
         throw new Error("Generate button not found");
       }
 
-      console.log("Processing domains...");
+      this.log("⚙️ Injection complete. Executing Beast Mode protocol...", 'system');
+      this.log("🔍 Scanning WHOIS database across global registrars...", 'info');
 
       // Wait for button area loading indicators to disappear
       await this.page.waitForFunction(() => {
@@ -246,7 +273,7 @@ export class NamecheapBeastModeChecker {
 
       await delay(2000);
       
-      console.log(`Parsing ${domains.length} domain results...`);
+      this.log(`🔬 Extracting data from ${domains.length} entries...`, 'info');
       for (const domain of domains) {
         try {
           const result = await this.parseDomainResult(domain);
@@ -268,7 +295,7 @@ export class NamecheapBeastModeChecker {
         taken: results.filter(r => r.status === "taken").length,
         error: results.filter(r => r.status === "error").length,
       };
-      console.log(`Results: ${summary.available} available, ${summary.premium} premium, ${summary.taken} taken, ${summary.error} errors`);
+      this.log(`✓ Scan complete: ${summary.available} available, ${summary.premium} premium, ${summary.taken} taken`, 'success');
 
       // Reset for next batch
       const resetClicked = await this.page.evaluate(() => {
