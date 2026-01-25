@@ -137,6 +137,10 @@ npm run cli -- --help
 - 📊 **Detailed Statistics** - Summary with available/premium/taken counts
 - 🔍 **Full Transparency** - See every step: connection, upload, scan, extraction
 
+#### Example Output
+
+![CLI Screenshot](public/cli-screenshot.png)
+
 #### Supported File Formats
 
 - **TXT** - One domain per line
