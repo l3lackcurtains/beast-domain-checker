@@ -6,9 +6,11 @@ A fast, beautiful bulk domain availability checker powered by Namecheap Beast Mo
 ![Playwright](https://img.shields.io/badge/Playwright-1.58-green)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 
+![Beast Domain Checker Screenshot](public/screenshot.png)
+
 ## Features
 
-- **Bulk Checking** - Check up to 100 domains at once
+- **Bulk Checking** - Check up to 1000 domains at once
 - **Multiple Input Methods** - Upload CSV/TXT or paste directly
 - **Favorites System** - Save domains with prices for later
 - **Export Results** - Download as CSV
