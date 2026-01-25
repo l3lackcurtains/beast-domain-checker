@@ -816,8 +816,20 @@ const title = "Beast Domain Checker";
               addCliLog(`✓ Scan complete: ${stats.available} available, ${stats.premium} premium, ${stats.taken} taken`, 'success');
               addCliLog('═'.repeat(50), 'system');
               
-              // Wait before showing results
-              await new Promise(r => setTimeout(r, 800));
+              // Wait a moment, then fade out CLI logs
+              await new Promise(r => setTimeout(r, 1000));
+              
+              const loadingState = document.getElementById('loadingState');
+              const cliLogs = document.getElementById('cliLogs');
+              
+              // Fade out the CLI logs
+              loadingState?.classList.add('opacity-0');
+              await new Promise(r => setTimeout(r, 600));
+              
+              // Hide loading, show results with fade-in
+              loadingState?.classList.add('hidden');
+              loadingState?.classList.remove('opacity-0');
+              
               displayResults(data);
             } else if (eventType === 'error') {
               throw new Error(data.message);
@@ -828,10 +840,20 @@ const title = "Beast Domain Checker";
       } catch (error) {
         addCliLog('✗ CRITICAL ERROR: ' + (error as Error).message, 'error');
         addCliLog('⚠ Operation aborted', 'warning');
-        emptyResults?.classList.remove('hidden');
-      } finally {
-        await new Promise(r => setTimeout(r, 500));
+        
+        const loadingState = document.getElementById('loadingState');
+        const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement;
+        
+        await new Promise(r => setTimeout(r, 1000));
+        loadingState?.classList.add('opacity-0');
+        await new Promise(r => setTimeout(r, 600));
         loadingState?.classList.add('hidden');
+        loadingState?.classList.remove('opacity-0');
+        
+        emptyResults?.classList.remove('hidden');
+        submitBtn.disabled = false;
+      } finally {
+        const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement;
         submitBtn.disabled = false;
       }
     });

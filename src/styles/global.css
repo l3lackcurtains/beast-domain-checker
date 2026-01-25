@@ -134,8 +134,12 @@
     text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
   }
   
-  /* Smooth fade-in transition for results */
+  /* Smooth fade transitions */
   #resultsContent {
+    transition: opacity 0.6s ease-in-out;
+  }
+  
+  #loadingState {
     transition: opacity 0.6s ease-in-out;
   }
 }
