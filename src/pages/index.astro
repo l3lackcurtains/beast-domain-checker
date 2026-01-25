@@ -389,7 +389,7 @@ const title = "Beast Domain Checker";
                   fav.status === 'premium' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/50' :
                   'bg-red-500/10 text-red-500 border border-red-500/50'
                 }">
-                  ${fav.status === 'error' ? 'unavailable' : fav.status}
+                  ${fav.status === 'error' ? 'taken' : fav.status}
                 </span>
               </div>
 
@@ -697,7 +697,7 @@ const title = "Beast Domain Checker";
                   result.status === 'premium' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/50' :
                   'bg-red-500/10 text-red-500 border border-red-500/50'
                 }">
-                  ${result.status === 'error' ? 'unavailable' : result.status}
+                  ${result.status === 'error' ? 'taken' : result.status}
                 </span>
               </td>
               <td class="px-6 py-4 font-semibold text-primary-500/70">${result.price || '--'}</td>
