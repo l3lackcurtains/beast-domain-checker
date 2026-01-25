@@ -1,0 +1,11 @@
+services:
+  beast-domain-checker:
+    build: .
+    container_name: beast-domain-checker
+    ports:
+      - "6006:6006"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/data

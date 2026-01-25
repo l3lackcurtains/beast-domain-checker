@@ -19,11 +19,35 @@ A fast, beautiful bulk domain availability checker powered by Namecheap Beast Mo
 
 ## Quick Start
 
+### Docker Compose (Recommended)
+
 ```bash
-# Clone the repository
 git clone https://github.com/YOUR_USERNAME/beast-domain-checker.git
 cd beast-domain-checker
+docker compose up -d
+```
 
+### Docker
+
+```bash
+# Build image
+docker build -t beast-domain-checker .
+
+# Run container
+docker run -d -p 6006:6006 --name beast-domain-checker beast-domain-checker
+
+# Stop container
+docker stop beast-domain-checker
+
+# Remove container
+docker rm beast-domain-checker
+```
+
+Open [http://localhost:6006](http://localhost:6006) in your browser.
+
+### Manual Installation
+
+```bash
 # Install dependencies
 npm install
 
@@ -33,8 +57,6 @@ npx playwright install chromium
 # Start development server
 npm run dev
 ```
-
-Open [http://localhost:6006](http://localhost:6006) in your browser.
 
 ## Usage
 
