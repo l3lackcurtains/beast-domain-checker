@@ -20,7 +20,7 @@ export class NamecheapBeastModeChecker {
 
   async init() {
     this.browser = await puppeteer.launch({
-      headless: false, // Run with visible browser
+      headless: true,
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
@@ -88,17 +88,13 @@ export class NamecheapBeastModeChecker {
 
     try {
       // Create a temporary CSV file with domains
-      console.log("Creating CSV file for upload...");
       const tmpDir = os.tmpdir();
       const csvPath = path.join(tmpDir, `domains-${Date.now()}.csv`);
       const csvContent = domains.join("\n");
       fs.writeFileSync(csvPath, csvContent);
-      console.log(`✓ Created CSV file: ${csvPath}`);
 
       // Click "Import CSV file" button
-      console.log("Clicking Import CSV file button...");
       try {
-        // Use XPath or evaluate to find button by text in Puppeteer
         await this.page.waitForFunction(() => {
           const buttons = Array.from(document.querySelectorAll('button'));
           return buttons.some(b => b.textContent?.includes('Import CSV file'));
@@ -111,117 +107,56 @@ export class NamecheapBeastModeChecker {
             (importBtn as HTMLButtonElement).click();
           }
         });
-        console.log("✓ Import CSV dialog opened");
         await delay(1500);
       } catch (e) {
         throw new Error("Failed to open Import CSV dialog: " + e);
       }
 
       // Upload file using Puppeteer's file input handling
-      console.log("Uploading CSV file with Puppeteer...");
       try {
-        // Find the file input element
         const fileInputSelector = 'input[type="file"]';
         await this.page.waitForSelector(fileInputSelector, { timeout: 5000 });
         
-        console.log("✓ Found file input, uploading file...");
-        
-        // Upload file using Puppeteer's uploadFile method
         const fileInput = await this.page.$(fileInputSelector);
         if (!fileInput) {
           throw new Error("File input element not found");
         }
         
         await fileInput.uploadFile(csvPath);
-        console.log("✓ File uploaded successfully");
-        
-        // Wait a bit for the file to be processed
         await delay(1000);
         
-        // Debug: Check file input state
-        const fileInputDebug = await this.page.evaluate(() => {
-          const input = document.querySelector('input[type="file"]') as HTMLInputElement;
-          return {
-            hasFiles: input?.files?.length ?? 0,
-            fileName: input?.files?.[0]?.name ?? 'none',
-            fileSize: input?.files?.[0]?.size ?? 0,
-          };
-        });
-        console.log(`📋 File input debug:`, fileInputDebug);
-        
-        // Check Import button state (look for button with EXACTLY "Import", not "Import CSV file")
-        const buttonDebug = await this.page.evaluate(() => {
+        // Wait for Import button (inside dialog) to become enabled
+        await this.page.waitForFunction(() => {
           const buttons = Array.from(document.querySelectorAll('button'));
-          // Find all buttons with Import text
-          const importButtons = buttons.filter(b => b.textContent?.includes('Import'));
-          const importDialogBtn = buttons.find(b => {
+          const importBtn = buttons.find(b => {
             const text = b.textContent?.trim() || '';
-            // Match "Import" exactly or with whitespace, but NOT "Import CSV file"
+            return text === 'Import' || (text.includes('Import') && !text.includes('CSV') && !text.includes('file'));
+          });
+          return importBtn && !(importBtn as HTMLButtonElement).disabled;
+        }, { timeout: 10000 });
+        
+        // Click "Import" button in the dialog
+        const clicked = await this.page.evaluate(() => {
+          const buttons = Array.from(document.querySelectorAll('button'));
+          const importBtn = buttons.find(b => {
+            const text = b.textContent?.trim() || '';
             return text === 'Import' || (text.includes('Import') && !text.includes('CSV') && !text.includes('file'));
           });
           
-          return {
-            allImportButtons: importButtons.map(b => ({
-              text: b.textContent?.trim(),
-              disabled: (b as HTMLButtonElement).disabled
-            })),
-            dialogButtonFound: !!importDialogBtn,
-            dialogButtonDisabled: importDialogBtn ? (importDialogBtn as HTMLButtonElement).disabled : null,
-            dialogButtonText: importDialogBtn?.textContent?.trim() ?? null,
-          };
-        });
-        console.log(`🔘 Import button debug:`, buttonDebug);
-        
-        // Wait for Import button (inside dialog) to become enabled
-        console.log("Waiting for Import button (in dialog) to be enabled...");
-        try {
-          await this.page.waitForFunction(() => {
-            const buttons = Array.from(document.querySelectorAll('button'));
-            // Find the Import button in dialog (not "Import CSV file")
-            const importBtn = buttons.find(b => {
-              const text = b.textContent?.trim() || '';
-              return text === 'Import' || (text.includes('Import') && !text.includes('CSV') && !text.includes('file'));
-            });
-            return importBtn && !(importBtn as HTMLButtonElement).disabled;
-          }, { timeout: 10000 });
-          console.log("✓ Import button (in dialog) is now enabled");
-        } catch (e) {
-          console.log("⚠️ Import button still disabled, trying to click anyway...");
-        }
-        
-        // Click "Import" button in the dialog (NOT "Import CSV file")
-        console.log("Clicking Import button (in dialog)...");
-        try {
-          const clicked = await this.page.evaluate(() => {
-            const buttons = Array.from(document.querySelectorAll('button'));
-            // Find the Import button in dialog (not "Import CSV file")
-            const importBtn = buttons.find(b => {
-              const text = b.textContent?.trim() || '';
-              return text === 'Import' || (text.includes('Import') && !text.includes('CSV') && !text.includes('file'));
-            });
-            
-            if (importBtn) {
-              console.log('Found Import button in dialog:', importBtn.textContent);
-              (importBtn as HTMLButtonElement).click();
-              return true;
-            }
-            return false;
-          });
-          
-          if (clicked) {
-            console.log("✓ Import button (in dialog) clicked");
-          } else {
-            throw new Error('Import button not found in dialog');
+          if (importBtn) {
+            (importBtn as HTMLButtonElement).click();
+            return true;
           }
-        } catch (e) {
-          throw new Error("Failed to click Import button: " + e);
+          return false;
+        });
+        
+        if (!clicked) {
+          throw new Error('Import button not found in dialog');
         }
         
-        // Wait for the dialog to close and domains to be added
-        console.log("Waiting for import to complete...");
         await delay(3000);
         
-        // Verify domains were added by checking for domain buttons
+        // Verify domains were added
         const domainButtonsCount = await this.page.evaluate(() => {
           const buttons = Array.from(document.querySelectorAll('button'));
           return buttons.filter(b => {
@@ -229,12 +164,8 @@ export class NamecheapBeastModeChecker {
             return text.includes('.com') || text.includes('.net') || text.includes('.org');
           }).length;
         });
-        console.log(`✓ Found ${domainButtonsCount} domain buttons after import`);
         
         if (domainButtonsCount === 0) {
-          console.log("⚠️ Warning: No domain buttons found after import!");
-          
-          // Check if dialog is still open (import might have failed)
           const dialogStillOpen = await this.page.evaluate(() => {
             const headings = Array.from(document.querySelectorAll('*'));
             return headings.some(el => el.textContent?.includes('Import a CSV file'));
@@ -244,16 +175,13 @@ export class NamecheapBeastModeChecker {
           }
         }
       } catch (e) {
-        console.error("Error during CSV upload:", e);
         throw new Error("CSV upload failed: " + (e instanceof Error ? e.message : String(e)));
       }
 
       // Clean up temporary file
       fs.unlinkSync(csvPath);
-      console.log("✓ CSV file uploaded and cleaned up");
 
       // Click Generate button
-      console.log("Clicking Generate button...");
       const generateBtnFound = await this.page.evaluate(() => {
         const buttons = Array.from(document.querySelectorAll('button'));
         const generateBtn = buttons.find(b => b.textContent?.includes('Generate'));
@@ -268,51 +196,57 @@ export class NamecheapBeastModeChecker {
         throw new Error("Generate button not found");
       }
 
-      // Wait for results to load
-      console.log("Waiting for results to load...");
-      console.log(
-        "⏳ This may take 10-20 seconds for Beast Mode to process domains..."
-      );
+      console.log("Processing domains...");
 
-      // Wait for the page to finish loading results
-      await delay(10000); // Initial wait
+      // Wait for button area loading indicators to disappear
+      await this.page.waitForFunction(() => {
+        const buttons = document.querySelectorAll('button');
+        const loadingButtons = Array.from(buttons).filter(btn => {
+          const classList = btn.classList;
+          const text = btn.textContent || '';
+          const hasLoadingClass = Array.from(classList).some(c => 
+            c.includes('loading') || c.includes('spinner') || c.includes('disabled')
+          );
+          const hasLoadingText = text.includes('...') || text.includes('Loading') || text.includes('Processing');
+          const hasSpinner = btn.querySelector('[class*="loading"], [class*="spinner"], svg[class*="animate"]');
+          return hasLoadingClass || hasLoadingText || hasSpinner;
+        });
+        const loadingOverlays = document.querySelectorAll('[class*="overlay"], [class*="mask"], [class*="backdrop"]');
+        const visibleOverlays = Array.from(loadingOverlays).filter(overlay => {
+          const style = window.getComputedStyle(overlay as HTMLElement);
+          return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+        });
+        return loadingButtons.length === 0 && visibleOverlays.length === 0;
+      }, { timeout: 60000, polling: 500 });
 
-      // Check for error messages
-      const errorMsg = await this.page.$(".results-beast__error");
-      if (errorMsg) {
-        const errorText = await errorMsg.evaluate((el) => el.textContent);
-        console.log("⚠️ Beast Mode error:", errorText);
-      }
+      // Wait for domain results to appear
+      await Promise.race([
+        this.page.waitForSelector("article:not(.domain-empty)", { timeout: 30000 }),
+        this.page.waitForSelector(".results-beast__error", { timeout: 30000 }),
+      ]).catch(() => {});
 
-      // Wait for either results or error state
-      try {
-        await Promise.race([
-          this.page.waitForSelector("article:not(.domain-empty)", {
-            timeout: 30000,
-          }),
-          this.page.waitForSelector(".results-beast__error", {
-            timeout: 30000,
-          }),
-        ]);
-      } catch (e) {
-        console.log("⚠️ Timeout waiting for results");
-      }
+      // Wait for all domain cards to finish loading
+      await this.page.waitForFunction(() => {
+        const articles = document.querySelectorAll('article');
+        if (articles.length === 0) return false;
+        const loadingArticles = Array.from(articles).filter(article => {
+          const hasSkeleton = article.querySelector('[class*="skeleton"], [class*="placeholder"]');
+          const hasSpinner = article.querySelector('[class*="loading"], [class*="spinner"]');
+          const hasDomainName = article.querySelector('h2');
+          const hasStatusContent = article.textContent && (
+            article.textContent.includes('Add to cart') ||
+            article.textContent.includes('TAKEN') ||
+            article.textContent.includes('Make offer') ||
+            article.textContent.includes('€')
+          );
+          return hasSkeleton || hasSpinner || !hasDomainName || !hasStatusContent;
+        });
+        return loadingArticles.length === 0;
+      }, { timeout: 60000, polling: 1000 }).catch(() => {});
 
-      // Additional wait for dynamic content
-      await delay(3000);
-
-      // Debug: Check page state
-      const pageContent = await this.page.content();
-      const hasResults =
-        pageContent.includes("Add to Cart") ||
-        pageContent.includes("add to cart");
-      const hasError =
-        pageContent.includes("Unsupported TLD") ||
-        pageContent.includes("No available");
-      console.log(`📊 Has results: ${hasResults}, Has error: ${hasError}`);
-
-      // Parse results
-      console.log("Parsing results...");
+      await delay(2000);
+      
+      console.log(`Parsing ${domains.length} domain results...`);
       for (const domain of domains) {
         try {
           const result = await this.parseDomainResult(domain);
@@ -326,6 +260,15 @@ export class NamecheapBeastModeChecker {
           });
         }
       }
+      
+      // Log summary
+      const summary = {
+        available: results.filter(r => r.status === "available").length,
+        premium: results.filter(r => r.status === "premium").length,
+        taken: results.filter(r => r.status === "taken").length,
+        error: results.filter(r => r.status === "error").length,
+      };
+      console.log(`Results: ${summary.available} available, ${summary.premium} premium, ${summary.taken} taken, ${summary.error} errors`);
 
       // Reset for next batch
       const resetClicked = await this.page.evaluate(() => {
@@ -362,39 +305,38 @@ export class NamecheapBeastModeChecker {
       throw new Error("Page not initialized");
     }
 
-    console.log(`🔍 Parsing result for: ${domain}`);
-
-    // Get all articles
     const articles = await this.page.$$("article");
-    console.log(`  Found ${articles.length} article elements`);
-
-    // Normalize domain for comparison (lowercase)
     const domainLower = domain.toLowerCase();
 
-    // Check each article
     for (const article of articles) {
-      // First check the H2 heading for the domain name
       const h2Element = await article.$("h2");
       if (h2Element) {
         const h2Text = await h2Element.evaluate((el) => el.textContent);
         const h2TextLower = h2Text?.toLowerCase() || "";
 
-        // Check if this article is for our domain (case-insensitive)
         if (h2TextLower === domainLower) {
-          console.log(`  ✓ Found domain in article (via h2 heading)`);
-
           const text = await article.evaluate((el) => el.textContent);
           const textLower = text?.toLowerCase() || "";
 
-          // Method 1: Check for "Add to cart" text in article (means available)
-          if (textLower.includes("add to cart")) {
-            console.log(`  ✓ Available - has "Add to cart" button`);
+          // First check for taken/unavailable (priority check)
+          if (
+            textLower.includes("taken") ||
+            textLower.includes("make offer") ||
+            textLower.includes("unavailable") ||
+            textLower.includes("registered") ||
+            textLower.includes("not available")
+          ) {
+            return {
+              domain,
+              available: false,
+              status: "taken",
+            };
+          }
 
-            // Extract price - look for €XX.XX pattern
+          // Check for "Add to cart" (available)
+          if (textLower.includes("add to cart")) {
             const priceMatch = text?.match(/€([\d,]+\.?\d*)/);
             const price = priceMatch ? `€${priceMatch[1]}` : undefined;
-            console.log(`  Price: ${price || "not found"}`);
-
             const priceValue = price
               ? parseFloat(price.replace("€", "").replace(",", ""))
               : 0;
@@ -407,32 +349,12 @@ export class NamecheapBeastModeChecker {
             };
           }
 
-          // Method 2: Check for taken/unavailable indicators
-          if (
-            textLower.includes("taken") ||
-            textLower.includes("make offer") ||
-            textLower.includes("unavailable") ||
-            textLower.includes("registered") ||
-            textLower.includes("not available")
-          ) {
-            console.log(`  ✗ Taken - domain already registered`);
-            return {
-              domain,
-              available: false,
-              status: "taken",
-            };
-          }
-
-          // Method 3: If article has price but no "add to cart", might be premium/special
+          // Has price but no "add to cart" button
           const priceMatch = text?.match(/€([\d,]+\.?\d*)/);
           if (priceMatch) {
             const price = `€${priceMatch[1]}`;
             const priceValue = parseFloat(
               price.replace("€", "").replace(",", "")
-            );
-
-            console.log(
-              `  ⚠️ Has price (${price}) but no clear status - assuming available`
             );
 
             return {
@@ -442,15 +364,10 @@ export class NamecheapBeastModeChecker {
               status: priceValue > 100 ? "premium" : "available",
             };
           }
-
-          // Found domain but unclear status
-          console.log(`  ⚠️ Found but unclear status`);
-          console.log(`  Article text: ${text?.substring(0, 200)}`);
         }
       }
     }
 
-    console.log(`  ❌ Domain not found in results`);
     return {
       domain,
       available: false,

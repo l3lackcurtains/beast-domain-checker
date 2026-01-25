@@ -144,7 +144,7 @@ const title = "Beast Domain Checker";
         <div class="main-tab-content hidden" data-tab="results" role="tabpanel">
           <h2 class="text-xl font-bold mb-6 text-primary-500">$ ./scan_output</h2>
 
-          <div id="loadingState" class="hidden flex flex-col items-center justify-center min-h-[300px] border border-dashed border-primary-500/30 rounded bg-dark-600/50">
+          <div id="loadingState" class="hidden flex flex-col items-center justify-center min-h-[300px] rounded bg-dark-600/50">
             <div class="inline-block w-12 h-12 border-2 border-primary-500/30 border-t-primary-500 rounded-full animate-spin mb-4"></div>
             <p class="text-lg font-semibold text-primary-500">[ SCANNING... ]</p>
             <p class="text-sm text-primary-500/70 mt-2">// executing domain lookup</p>
@@ -177,7 +177,7 @@ const title = "Beast Domain Checker";
             </button>
           </div>
 
-          <div id="emptyResults" class="flex flex-col items-center justify-center min-h-[300px] border border-dashed border-primary-500/30 rounded bg-dark-600/50">
+          <div id="emptyResults" class="flex flex-col items-center justify-center min-h-[300px] rounded bg-dark-600/50">
             <div class="text-4xl mb-4 text-primary-500">[_]</div>
             <p class="text-lg font-semibold text-primary-500 mb-2">AWAITING_INPUT</p>
             <p class="text-sm text-primary-500/70">$ run scan to populate results</p>
@@ -352,7 +352,7 @@ const title = "Beast Domain Checker";
 
       if (favorites.length === 0) {
         container.innerHTML = `
-          <div class="flex flex-col items-center justify-center min-h-[300px] border border-dashed border-primary-500/30 rounded bg-dark-600/50">
+          <div class="flex flex-col items-center justify-center min-h-[300px] rounded bg-dark-600/50">
             <div class="text-4xl mb-4 text-primary-500">[*]</div>
             <p class="text-lg font-semibold text-primary-500 mb-2">NO_SAVED_DOMAINS</p>
             <p class="text-sm text-primary-500/70">$ scan domains and save favorites</p>
