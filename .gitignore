@@ -1,0 +1,59 @@
+# Build output
+dist/
+
+# Generated types
+.astro/
+
+# Dependencies
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE/Editor
+.idea/
+.vscode/
+.claude/
+*.swp
+*.swo
+*~
+
+# Data files
+data/
+
+# Backups and temp files
+*.backup
+*-old.*
+*.tmp
+*.temp
+
+# Test artifacts
+test-results/
+playwright-report/
+playwright/.cache/
+coverage/
+*.test.html
+
+# Debug/test scripts
+*-test.ts
+*-debug.ts
+debug-*.ts
+test-*.ts
+test-*.html
+
+# Generated reports
+*-results.html
+*-results.json

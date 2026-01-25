@@ -1,0 +1,798 @@
+---
+import '../styles/global.css';
+
+const title = "Beast Domain Checker";
+// Favorites and results are now stored in localStorage (client-side)
+---
+
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="min-h-screen p-4 md:p-8">
+  <div class="max-w-7xl mx-auto">
+    
+    <!-- Header -->
+    <header class="relative overflow-hidden bg-dark-500 border border-primary-500/30 rounded-lg p-8 mb-8 glow-border">
+      <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary-500 to-transparent"></div>
+      <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary-500/50 to-transparent"></div>
+      <h1 class="text-3xl md:text-5xl font-bold text-center mb-3 text-primary-500 glow-text tracking-wider">
+        [ BEAST_DOMAIN_CHECKER ]
+      </h1>
+      <p class="text-center text-primary-500/60 text-sm md:text-base font-medium">
+        <span class="text-primary-500">$</span> bulk domain availability scanner <span class="cursor-blink"></span>
+      </p>
+      <a href="https://www.namecheap.com" target="_blank" rel="noopener" class="mt-4 inline-flex items-center justify-center gap-2 text-xs text-primary-500/50 hover:text-primary-500 mx-auto block text-center">
+        powered by <span class="text-primary-500/70 font-semibold">Namecheap</span> <span class="text-xs">↗</span>
+      </a>
+    </header>
+
+    <!-- Main Tabs -->
+    <div class="bg-dark-500 border border-primary-500/20 rounded-lg overflow-hidden glow-border">
+      
+      <!-- Tab Navigation -->
+      <div class="border-b border-primary-500/20 bg-dark-600">
+        <nav class="flex -mb-px" role="tablist">
+          <button
+            class="main-tab flex-1 px-6 py-4 text-sm md:text-base font-semibold uppercase tracking-wider border-b-2 border-transparent hover:text-primary-500 hover:border-primary-500/50"
+            data-tab="check"
+            role="tab"
+          >
+            ./check
+          </button>
+          <button
+            class="main-tab flex-1 px-6 py-4 text-sm md:text-base font-semibold uppercase tracking-wider border-b-2 border-transparent hover:text-primary-500 hover:border-primary-500/50"
+            data-tab="favorites"
+            role="tab"
+          >
+            ./saved
+            <span id="favCount" class="ml-2 px-2 py-0.5 bg-primary-500/20 text-primary-500 border border-primary-500/50 rounded text-xs font-bold">
+              0
+            </span>
+          </button>
+          <button
+            class="main-tab flex-1 px-6 py-4 text-sm md:text-base font-semibold uppercase tracking-wider border-b-2 border-transparent hover:text-primary-500 hover:border-primary-500/50"
+            data-tab="results"
+            role="tab"
+          >
+            ./output
+          </button>
+        </nav>
+      </div>
+
+      <!-- Tab Contents -->
+      <div class="p-6 md:p-8 min-h-[500px]">
+
+        <!-- Check Domains Tab -->
+        <div class="main-tab-content" data-tab="check" role="tabpanel">
+          <h2 class="text-xl font-bold mb-6 text-primary-500">$ ./check_domains</h2>
+          
+          <!-- Sub Tabs for Input Methods -->
+          <div class="mb-6">
+            <div class="flex gap-2 border-b border-dark-200 mb-6">
+              <button class="input-tab px-4 py-2 text-sm font-semibold border-b-2 transition-all" data-input="upload">
+                <span class="text-primary-500">[</span> UPLOAD <span class="text-primary-500">]</span>
+              </button>
+              <button class="input-tab px-4 py-2 text-sm font-semibold border-b-2 transition-all" data-input="paste">
+                <span class="text-primary-500">[</span> PASTE <span class="text-primary-500">]</span>
+              </button>
+            </div>
+
+            <form id="checkForm" class="space-y-6">
+              
+              <!-- Upload Tab -->
+              <div class="input-tab-content" data-input="upload">
+                <input type="file" id="fileInput" name="file" class="hidden" accept=".csv,.txt">
+                <label
+                  for="fileInput"
+                  id="uploadZone"
+                  class="flex flex-col items-center justify-center border border-dashed border-primary-500/30 rounded bg-dark-600 text-center cursor-pointer hover:border-primary-500 hover:bg-primary-500/5 h-52"
+                >
+                  <div class="text-4xl mb-4 text-primary-500">[+]</div>
+                  <div class="text-sm font-semibold text-primary-500 mb-2">DROP_FILE || CLICK_TO_UPLOAD</div>
+                  <div class="text-xs text-primary-500/70">*.csv | *.txt</div>
+                </label>
+                <p class="mt-4 text-xs text-primary-500/70">// one domain per line (e.g., example.com)</p>
+              </div>
+
+              <!-- Paste Tab -->
+              <div class="input-tab-content hidden" data-input="paste">
+                <textarea
+                  id="domainsInput"
+                  name="domains"
+                  placeholder="example.com&#10;mysite.dev&#10;awesome.io"
+                  class="w-full h-52 px-4 py-3 bg-dark-600 border border-primary-500/30 rounded text-primary-500 placeholder-primary-500/30 focus:border-primary-500 focus:ring-0 resize-none font-mono"
+                ></textarea>
+                <p class="mt-4 text-xs text-primary-500/70">// enter one domain per line with extension</p>
+              </div>
+
+              <div class="flex gap-3">
+                <button
+                  type="submit"
+                  id="submitBtn"
+                  class="flex-1 bg-primary-500 text-black font-bold py-4 px-6 rounded border border-primary-400 uppercase tracking-wider hover:bg-primary-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span class="mr-2">$</span>execute --scan
+                </button>
+                <button
+                  type="button"
+                  id="clearInputBtn"
+                  class="hidden px-6 py-4 bg-transparent border border-red-500/50 text-red-500 font-bold rounded uppercase tracking-wider hover:bg-red-500/20 hover:border-red-500"
+                >
+                  reset
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Favorites Tab -->
+        <div class="main-tab-content hidden" data-tab="favorites" role="tabpanel">
+          <h2 class="text-xl font-bold mb-6 text-primary-500">$ ./saved_domains</h2>
+          <div id="favoritesContainer">
+            <!-- Populated by JavaScript -->
+          </div>
+        </div>
+
+        <!-- Results Tab -->
+        <div class="main-tab-content hidden" data-tab="results" role="tabpanel">
+          <h2 class="text-xl font-bold mb-6 text-primary-500">$ ./scan_output</h2>
+
+          <div id="loadingState" class="hidden flex flex-col items-center justify-center min-h-[300px] border border-dashed border-primary-500/30 rounded bg-dark-600/50">
+            <div class="inline-block w-12 h-12 border-2 border-primary-500/30 border-t-primary-500 rounded-full animate-spin mb-4"></div>
+            <p class="text-lg font-semibold text-primary-500">[ SCANNING... ]</p>
+            <p class="text-sm text-primary-500/70 mt-2">// executing domain lookup</p>
+          </div>
+
+          <div id="resultsContent" class="hidden">
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6" id="statsGrid"></div>
+
+            <!-- Results Table -->
+            <div class="overflow-x-auto bg-dark-600 rounded border border-primary-500/20">
+              <table class="w-full text-sm">
+                <thead class="bg-dark-500 border-b border-primary-500/30">
+                  <tr>
+                    <th class="px-6 py-4 text-left font-bold text-primary-500 uppercase tracking-wider text-xs">DOMAIN</th>
+                    <th class="px-6 py-4 text-left font-bold text-primary-500 uppercase tracking-wider text-xs">STATUS</th>
+                    <th class="px-6 py-4 text-left font-bold text-primary-500 uppercase tracking-wider text-xs">PRICE</th>
+                    <th class="px-6 py-4 text-left font-bold text-primary-500 uppercase tracking-wider text-xs">ACTION</th>
+                  </tr>
+                </thead>
+                <tbody id="resultsBody" class="divide-y divide-primary-500/10"></tbody>
+              </table>
+            </div>
+
+            <button
+              id="exportBtn"
+              class="mt-6 w-full bg-transparent border border-primary-500/50 text-primary-500 font-bold py-4 px-6 rounded uppercase tracking-wider hover:bg-primary-500/10 hover:border-primary-500"
+            >
+              $ export --format=csv
+            </button>
+          </div>
+
+          <div id="emptyResults" class="flex flex-col items-center justify-center min-h-[300px] border border-dashed border-primary-500/30 rounded bg-dark-600/50">
+            <div class="text-4xl mb-4 text-primary-500">[_]</div>
+            <p class="text-lg font-semibold text-primary-500 mb-2">AWAITING_INPUT</p>
+            <p class="text-sm text-primary-500/70">$ run scan to populate results</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let currentResults = [];
+
+    // ===== localStorage Management =====
+    const STORAGE_KEYS = {
+      FAVORITES: 'beast-domain-checker-favorites',
+      RESULTS: 'beast-domain-checker-results',
+      INPUT: 'beast-domain-checker-input'
+    };
+
+    function getFavorites() {
+      try {
+        const data = localStorage.getItem(STORAGE_KEYS.FAVORITES);
+        return data ? JSON.parse(data) : [];
+      } catch (e) {
+        console.error('Error loading favorites:', e);
+        return [];
+      }
+    }
+
+    function saveFavorites(favorites) {
+      try {
+        localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(favorites));
+        updateFavoritesDisplay();
+      } catch (e) {
+        console.error('Error saving favorites:', e);
+      }
+    }
+
+    function addFavorite(domain) {
+      const favorites = getFavorites();
+      const exists = favorites.find(f => f.domain === domain.domain);
+      if (exists) {
+        alert('Domain already in favorites');
+        return false;
+      }
+      favorites.push({
+        ...domain,
+        addedAt: new Date().toISOString()
+      });
+      saveFavorites(favorites);
+      return true;
+    }
+
+    function removeFavorite(domain) {
+      const favorites = getFavorites();
+      const filtered = favorites.filter(f => f.domain !== domain);
+      saveFavorites(filtered);
+    }
+
+    function getSavedResults() {
+      try {
+        const data = localStorage.getItem(STORAGE_KEYS.RESULTS);
+        return data ? JSON.parse(data) : null;
+      } catch (e) {
+        console.error('Error loading results:', e);
+        return null;
+      }
+    }
+
+    function saveResults(results) {
+      try {
+        localStorage.setItem(STORAGE_KEYS.RESULTS, JSON.stringify({
+          results: results,
+          timestamp: new Date().toISOString()
+        }));
+      } catch (e) {
+        console.error('Error saving results:', e);
+      }
+    }
+
+    // ===== Input Persistence =====
+    function getSavedInput() {
+      try {
+        const data = localStorage.getItem(STORAGE_KEYS.INPUT);
+        return data ? JSON.parse(data) : null;
+      } catch (e) {
+        console.error('Error loading input:', e);
+        return null;
+      }
+    }
+
+    function saveInput(input) {
+      try {
+        localStorage.setItem(STORAGE_KEYS.INPUT, JSON.stringify({
+          domains: input.domains || '',
+          fileName: input.fileName || null,
+          timestamp: new Date().toISOString()
+        }));
+        updateClearButtonVisibility();
+      } catch (e) {
+        console.error('Error saving input:', e);
+      }
+    }
+
+    function clearInput() {
+      localStorage.removeItem(STORAGE_KEYS.INPUT);
+      const domainsInput = document.getElementById('domainsInput');
+      const fileInput = document.getElementById('fileInput');
+      const uploadZone = document.getElementById('uploadZone');
+
+      if (domainsInput) domainsInput.value = '';
+      if (fileInput) fileInput.value = '';
+      if (uploadZone) {
+        uploadZone.innerHTML = `
+          <div class="text-6xl mb-4">📁</div>
+          <div class="text-lg font-semibold text-gray-300 mb-2">Drop file or click to upload</div>
+          <div class="text-sm text-gray-500 code-comment">Supports CSV and TXT files</div>
+        `;
+        uploadZone.classList.remove('border-primary-500', 'bg-primary-500/10');
+        uploadZone.classList.add('flex', 'flex-col', 'items-center', 'justify-center');
+      }
+      updateClearButtonVisibility();
+    }
+
+    function updateClearButtonVisibility() {
+      const clearBtn = document.getElementById('clearInputBtn');
+      const savedInput = getSavedInput();
+      if (clearBtn) {
+        if (savedInput && (savedInput.domains || savedInput.fileName)) {
+          clearBtn.classList.remove('hidden');
+        } else {
+          clearBtn.classList.add('hidden');
+        }
+      }
+    }
+
+    function restoreInput() {
+      const savedInput = getSavedInput();
+      if (!savedInput) return;
+
+      const domainsInput = document.getElementById('domainsInput');
+      const uploadZone = document.getElementById('uploadZone');
+
+      if (savedInput.domains && domainsInput) {
+        domainsInput.value = savedInput.domains;
+      }
+
+      if (savedInput.fileName && uploadZone) {
+        uploadZone.innerHTML = `
+          <div class="text-6xl mb-4">✓</div>
+          <div class="text-lg font-semibold text-primary-500 mb-2">${savedInput.fileName}</div>
+          <div class="text-sm text-gray-500">Restored from previous session</div>
+        `;
+        uploadZone.classList.add('border-primary-500', 'bg-primary-500/10', 'flex', 'flex-col', 'items-center', 'justify-center');
+      }
+
+      updateClearButtonVisibility();
+    }
+
+    function updateFavoritesDisplay() {
+      const favorites = getFavorites();
+      const container = document.getElementById('favoritesContainer');
+      const countBadge = document.getElementById('favCount');
+      
+      if (countBadge) {
+        countBadge.textContent = favorites.length;
+      }
+
+      if (!container) return;
+
+      if (favorites.length === 0) {
+        container.innerHTML = `
+          <div class="flex flex-col items-center justify-center min-h-[300px] border border-dashed border-primary-500/30 rounded bg-dark-600/50">
+            <div class="text-4xl mb-4 text-primary-500">[*]</div>
+            <p class="text-lg font-semibold text-primary-500 mb-2">NO_SAVED_DOMAINS</p>
+            <p class="text-sm text-primary-500/70">$ scan domains and save favorites</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          ${favorites.map(fav => {
+            const namecheapUrl = `https://www.namecheap.com/domains/registration/results/?domain=${encodeURIComponent(fav.domain)}`;
+            return `
+            <div class="relative bg-dark-600 border rounded p-5 hover:border-primary-500/50 ${
+              fav.status === 'available' ? 'border-primary-500/30' :
+              fav.status === 'premium' ? 'border-yellow-500/30' :
+              'border-red-500/30'
+            }">
+              <button
+                class="remove-fav-btn absolute top-3 right-3 w-6 h-6 bg-transparent border border-red-500/50 hover:bg-red-500/20 text-red-500 rounded text-sm font-bold flex items-center justify-center"
+                data-domain="${fav.domain}"
+              >
+                x
+              </button>
+
+              <a href="${namecheapUrl}" target="_blank" rel="noopener" class="font-bold text-base mb-3 text-primary-500 break-all pr-8 hover:underline flex items-center gap-2">
+                ${fav.domain}
+                <span class="text-primary-500/50 text-xs">↗</span>
+              </a>
+
+              <div class="flex items-center gap-2 mb-3 mt-3">
+                <span class="px-2 py-1 text-xs font-bold uppercase rounded ${
+                  fav.status === 'available' ? 'bg-primary-500/10 text-primary-500 border border-primary-500/50' :
+                  fav.status === 'premium' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/50' :
+                  'bg-red-500/10 text-red-500 border border-red-500/50'
+                }">
+                  ${fav.status}
+                </span>
+              </div>
+
+              ${fav.price ? `
+                <div class="text-xl font-bold text-primary-400 mb-3">
+                  ${fav.price}
+                </div>
+              ` : ''}
+
+              <div class="text-xs text-primary-500/70">
+                // saved: ${new Date(fav.addedAt).toLocaleDateString()}
+              </div>
+            </div>
+          `}).join('')}
+        </div>
+      `;
+
+      // Attach remove listeners
+      document.querySelectorAll('.remove-fav-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const domain = e.target.dataset.domain;
+          if (confirm(`Remove ${domain} from favorites?`)) {
+            removeFavorite(domain);
+          }
+        });
+      });
+    }
+
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', () => {
+      updateFavoritesDisplay();
+      restoreInput();
+
+      // Load saved results if they exist
+      const savedResults = getSavedResults();
+      if (savedResults && savedResults.results && savedResults.results.length > 0) {
+        console.log('📂 Loading saved results from localStorage');
+        currentResults = savedResults.results;
+        displayResults({ results: savedResults.results });
+
+        // Auto-switch to results tab
+        activateMainTab('results');
+      }
+
+      // Clear button handler
+      document.getElementById('clearInputBtn')?.addEventListener('click', () => {
+        if (confirm('Clear all input data?')) {
+          clearInput();
+        }
+      });
+
+      // Save textarea input on change
+      const domainsInput = document.getElementById('domainsInput');
+      domainsInput?.addEventListener('input', (e) => {
+        const savedInput = getSavedInput() || {};
+        saveInput({
+          ...savedInput,
+          domains: e.target.value
+        });
+      });
+    });
+
+    // ===== URL Query Params =====
+    function getQueryParam(key) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(key);
+    }
+
+    function setQueryParam(key, value) {
+      const params = new URLSearchParams(window.location.search);
+      params.set(key, value);
+      window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+    }
+
+    // Main tab switching
+    const mainTabs = document.querySelectorAll('.main-tab');
+    const mainTabContents = document.querySelectorAll('.main-tab-content');
+
+    function activateMainTab(tabName, updateUrl = true) {
+      mainTabs.forEach(t => {
+        t.classList.remove('border-primary-500', 'text-primary-500');
+        t.classList.add('border-transparent', 'text-gray-400');
+      });
+      mainTabContents.forEach(c => c.classList.add('hidden'));
+
+      const tab = document.querySelector(`.main-tab[data-tab="${tabName}"]`);
+      const content = document.querySelector(`.main-tab-content[data-tab="${tabName}"]`);
+
+      if (tab) {
+        tab.classList.add('border-primary-500', 'text-primary-500');
+        tab.classList.remove('border-transparent', 'text-gray-400');
+      }
+      if (content) content.classList.remove('hidden');
+      if (updateUrl) setQueryParam('tab', tabName);
+    }
+
+    mainTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        activateMainTab(tab.dataset.tab);
+      });
+    });
+
+    // Input method tabs
+    const inputTabs = document.querySelectorAll('.input-tab');
+    const inputTabContents = document.querySelectorAll('.input-tab-content');
+
+    function activateInputTab(inputName, updateUrl = true) {
+      inputTabs.forEach(t => {
+        t.classList.remove('border-primary-500', 'text-primary-500');
+        t.classList.add('border-transparent', 'text-gray-400');
+      });
+      inputTabContents.forEach(c => c.classList.add('hidden'));
+
+      const tab = document.querySelector(`.input-tab[data-input="${inputName}"]`);
+      const content = document.querySelector(`.input-tab-content[data-input="${inputName}"]`);
+
+      if (tab) {
+        tab.classList.add('border-primary-500', 'text-primary-500');
+        tab.classList.remove('border-transparent', 'text-gray-400');
+      }
+      if (content) content.classList.remove('hidden');
+      if (updateUrl) setQueryParam('input', inputName);
+    }
+
+    inputTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        activateInputTab(tab.dataset.input);
+      });
+    });
+
+    // Initialize tabs from URL or defaults
+    const initialTab = getQueryParam('tab') || 'check';
+    const initialInput = getQueryParam('input') || 'upload';
+    activateMainTab(initialTab, false);
+    activateInputTab(initialInput, false);
+
+    // File upload
+    const fileInput = document.getElementById('fileInput');
+    const uploadZone = document.getElementById('uploadZone');
+
+    fileInput?.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        uploadZone.innerHTML = `
+          <div class="text-6xl mb-4">✓</div>
+          <div class="text-lg font-semibold text-primary-500 mb-2">${file.name}</div>
+          <div class="text-sm text-gray-500">${(file.size / 1024).toFixed(2)} KB</div>
+        `;
+        uploadZone.classList.add('border-primary-500', 'bg-primary-500/10', 'flex', 'flex-col', 'items-center', 'justify-center');
+
+        // Read file content and save to localStorage
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const content = event.target?.result;
+          if (typeof content === 'string') {
+            const savedInput = getSavedInput() || {};
+            saveInput({
+              ...savedInput,
+              domains: content,
+              fileName: file.name
+            });
+          }
+        };
+        reader.readAsText(file);
+      }
+    });
+
+    // Drag and drop
+    uploadZone?.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('border-primary-500', 'bg-primary-500/5');
+    });
+
+    uploadZone?.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('border-primary-500', 'bg-primary-500/5');
+    });
+
+    uploadZone?.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const file = e.dataTransfer?.files?.[0];
+      if (file && fileInput) {
+        fileInput.files = e.dataTransfer.files;
+        fileInput.dispatchEvent(new Event('change'));
+      }
+    });
+
+    // Form submission
+    document.getElementById('checkForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(e.target);
+      const submitBtn = document.getElementById('submitBtn');
+      const loadingState = document.getElementById('loadingState');
+      const resultsContent = document.getElementById('resultsContent');
+      const emptyResults = document.getElementById('emptyResults');
+
+      // Switch to results tab and show loading
+      activateMainTab('results');
+      
+      loadingState?.classList.remove('hidden');
+      resultsContent?.classList.add('hidden');
+      emptyResults?.classList.add('hidden');
+      submitBtn.disabled = true;
+
+      try {
+        const response = await fetch('/api/check-domains', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to check domains');
+        }
+
+        currentResults = data.results;
+        saveResults(data.results); // Save to localStorage
+        displayResults(data);
+
+      } catch (error) {
+        alert('Error: ' + error.message);
+        emptyResults?.classList.remove('hidden');
+      } finally {
+        loadingState?.classList.add('hidden');
+        submitBtn.disabled = false;
+      }
+    });
+
+    function displayResults(data) {
+      const statsGrid = document.getElementById('statsGrid');
+      const resultsBody = document.getElementById('resultsBody');
+      const resultsContent = document.getElementById('resultsContent');
+      const emptyResults = document.getElementById('emptyResults');
+
+      const stats = {
+        available: data.results.filter(r => r.status === 'available').length,
+        taken: data.results.filter(r => r.status === 'taken').length,
+        premium: data.results.filter(r => r.status === 'premium').length
+      };
+
+      if (statsGrid) {
+        statsGrid.innerHTML = `
+          <div class="bg-dark-600 border border-primary-500/30 rounded p-6 text-center">
+            <div class="text-3xl font-bold text-primary-500 mb-2 glow-text">${stats.available}</div>
+            <div class="text-xs text-primary-500/70 uppercase tracking-wider">AVAILABLE</div>
+          </div>
+          <div class="bg-dark-600 border border-red-500/30 rounded p-6 text-center">
+            <div class="text-3xl font-bold text-red-500 mb-2">${stats.taken}</div>
+            <div class="text-xs text-red-500/70 uppercase tracking-wider">TAKEN</div>
+          </div>
+          <div class="bg-dark-600 border border-yellow-500/30 rounded p-6 text-center">
+            <div class="text-3xl font-bold text-yellow-500 mb-2">${stats.premium}</div>
+            <div class="text-xs text-yellow-500/70 uppercase tracking-wider">PREMIUM</div>
+          </div>
+        `;
+      }
+
+      if (resultsBody) {
+        // Sort results: Available first (sorted by price), then Premium, then Taken/Error
+        const sortedResults = [...data.results].sort((a, b) => {
+          // Priority order: available < premium < taken < error
+          const statusPriority = { 'available': 1, 'premium': 2, 'taken': 3, 'error': 4 };
+          const aPriority = statusPriority[a.status] || 5;
+          const bPriority = statusPriority[b.status] || 5;
+          
+          if (aPriority !== bPriority) {
+            return aPriority - bPriority;
+          }
+          
+          // Within same status, sort by price (cheapest first)
+          if (a.price && b.price) {
+            const aPrice = parseFloat(a.price.replace(/[€,]/g, ''));
+            const bPrice = parseFloat(b.price.replace(/[€,]/g, ''));
+            return aPrice - bPrice;
+          }
+          
+          // If one has price and other doesn't, prioritize the one with price
+          if (a.price && !b.price) return -1;
+          if (!a.price && b.price) return 1;
+          
+          // Otherwise sort alphabetically
+          return a.domain.localeCompare(b.domain);
+        });
+
+        // Check which domains are already in favorites
+        const favorites = getFavorites();
+        const favoritesDomains = new Set(favorites.map(f => f.domain));
+
+        resultsBody.innerHTML = sortedResults.map(result => {
+          const isInFavorites = favoritesDomains.has(result.domain);
+          const namecheapUrl = `https://www.namecheap.com/domains/registration/results/?domain=${encodeURIComponent(result.domain)}`;
+
+          return `
+            <tr class="hover:bg-primary-500/5">
+              <td class="px-6 py-4">
+                <a href="${namecheapUrl}" target="_blank" rel="noopener" class="font-bold text-primary-500 hover:underline flex items-center gap-2">
+                  ${result.domain}
+                  <span class="text-primary-500/50 text-xs">↗</span>
+                </a>
+              </td>
+              <td class="px-6 py-4">
+                <span class="px-2 py-1 text-xs font-bold uppercase rounded ${
+                  result.status === 'available' ? 'bg-primary-500/10 text-primary-500 border border-primary-500/50' :
+                  result.status === 'premium' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/50' :
+                  'bg-red-500/10 text-red-500 border border-red-500/50'
+                }">
+                  ${result.status}
+                </span>
+              </td>
+              <td class="px-6 py-4 font-semibold text-primary-500/70">${result.price || '--'}</td>
+              <td class="px-6 py-4">
+                ${isInFavorites ? `
+                  <button class="px-3 py-2 bg-transparent border border-primary-500/30 text-primary-500/50 text-xs font-bold rounded uppercase cursor-not-allowed"
+                          disabled>
+                    [SAVED]
+                  </button>
+                ` : `
+                  <button class="btn-favorite px-3 py-2 bg-primary-500 text-black text-xs font-bold rounded uppercase hover:bg-primary-400"
+                          data-domain="${result.domain}"
+                          data-status="${result.status}"
+                          data-price="${result.price || ''}"
+                          data-available="${result.available}">
+                    +SAVE
+                  </button>
+                `}
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        // Add favorite listeners
+        document.querySelectorAll('.btn-favorite').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const button = e.target;
+            const domainData = {
+              domain: button.dataset.domain,
+              status: button.dataset.status,
+              price: button.dataset.price,
+              available: button.dataset.available === 'true'
+            };
+
+            const success = addFavorite(domainData);
+            
+            if (success) {
+              button.textContent = '✓ Already Added';
+              button.classList.remove('bg-gradient-to-r', 'from-primary-500', 'to-cyan-500', 'text-dark-500', 'hover:shadow-lg');
+              button.classList.add('bg-gray-600', 'text-gray-300', 'opacity-60', 'cursor-not-allowed');
+              button.disabled = true;
+              updateFavoritesDisplay(); // Update favorites tab
+            }
+          });
+        });
+      }
+
+      resultsContent?.classList.remove('hidden');
+      emptyResults?.classList.add('hidden');
+    }
+
+    // Note: Remove favorites listeners are now attached in updateFavoritesDisplay() function
+
+    // Export
+    document.getElementById('exportBtn')?.addEventListener('click', () => {
+      if (currentResults.length === 0) return;
+
+      // Sort before export (same logic as display)
+      const sortedResults = [...currentResults].sort((a, b) => {
+        const statusPriority = { 'available': 1, 'premium': 2, 'taken': 3, 'error': 4 };
+        const aPriority = statusPriority[a.status] || 5;
+        const bPriority = statusPriority[b.status] || 5;
+        
+        if (aPriority !== bPriority) return aPriority - bPriority;
+        
+        if (a.price && b.price) {
+          const aPrice = parseFloat(a.price.replace(/[€,]/g, ''));
+          const bPrice = parseFloat(b.price.replace(/[€,]/g, ''));
+          return aPrice - bPrice;
+        }
+        
+        if (a.price && !b.price) return -1;
+        if (!a.price && b.price) return 1;
+        
+        return a.domain.localeCompare(b.domain);
+      });
+
+      const csv = [
+        ['Domain', 'Status', 'Available', 'Price'],
+        ...sortedResults.map(r => [
+          r.domain,
+          r.status,
+          r.available ? 'Yes' : 'No',
+          r.price || 'N/A'
+        ])
+      ].map(row => row.join(',')).join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `domains-${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>

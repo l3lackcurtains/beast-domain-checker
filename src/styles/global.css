@@ -1,0 +1,136 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-mono text-gray-300;
+    background-color: #000;
+    background-image:
+      radial-gradient(ellipse at top, rgba(0, 255, 65, 0.03) 0%, transparent 50%),
+      radial-gradient(ellipse at bottom, rgba(0, 255, 65, 0.02) 0%, transparent 50%),
+      linear-gradient(rgba(0, 255, 65, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 65, 0.02) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+    min-height: 100vh;
+  }
+
+  /* CRT Scanline effect */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.15),
+      rgba(0, 0, 0, 0.15) 1px,
+      transparent 1px,
+      transparent 2px
+    );
+    z-index: 9999;
+  }
+
+  /* Glowing text selection */
+  ::selection {
+    background: #00ff41;
+    color: #000;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0a0a0a;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #00ff41;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #33ff55;
+  }
+}
+
+@layer components {
+  .terminal-prompt::before {
+    @apply text-primary-500;
+    content: '> ';
+    text-shadow: 0 0 10px #00ff41;
+  }
+
+  .code-comment::before {
+    @apply text-primary-500/70;
+    content: '// ';
+  }
+
+  .tree-line::before {
+    @apply text-primary-500;
+    content: '└─ ';
+  }
+
+  /* Glowing text */
+  .glow-text {
+    text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41, 0 0 30px #00ff41;
+  }
+
+  /* Glowing border */
+  .glow-border {
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.3), inset 0 0 10px rgba(0, 255, 65, 0.1);
+  }
+
+  /* Terminal window style */
+  .terminal-window {
+    @apply bg-dark-500 border border-primary-500/30 rounded-lg;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.1), inset 0 0 60px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Blinking cursor */
+  .cursor-blink::after {
+    content: '█';
+    @apply text-primary-500;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* Matrix rain effect for backgrounds */
+  .matrix-bg {
+    background-image:
+      linear-gradient(0deg, transparent 24%, rgba(0, 255, 65, 0.05) 25%, rgba(0, 255, 65, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 65, 0.05) 75%, rgba(0, 255, 65, 0.05) 76%, transparent 77%, transparent),
+      linear-gradient(90deg, transparent 24%, rgba(0, 255, 65, 0.05) 25%, rgba(0, 255, 65, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 65, 0.05) 75%, rgba(0, 255, 65, 0.05) 76%, transparent 77%, transparent);
+    background-size: 50px 50px;
+  }
+
+  /* Input focus glow */
+  input:focus, textarea:focus, select:focus {
+    @apply border-primary-500 ring-0;
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+  }
+
+  /* Button hover glow */
+  button:hover:not(:disabled) {
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
+  }
+}
+
+@layer utilities {
+  .text-glow {
+    text-shadow: 0 0 10px currentColor;
+  }
+
+  .text-glow-lg {
+    text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+  }
+}
