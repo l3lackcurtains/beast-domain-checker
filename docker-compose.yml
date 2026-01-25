@@ -6,6 +6,11 @@ services:
       - "6006:6006"
     environment:
       - NODE_ENV=production
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=false
     restart: unless-stopped
     volumes:
       - ./data:/app/data
+    # Required for Puppeteer to run Chromium in Docker
+    security_opt:
+      - seccomp:unconfined
+    shm_size: '2gb'

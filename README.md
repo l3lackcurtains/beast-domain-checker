@@ -1,9 +1,9 @@
 # Beast Domain Checker
 
-A fast, beautiful bulk domain availability checker powered by Namecheap Beast Mode automation.
+A fast, beautiful bulk domain availability checker powered by Namecheap Beast Mode automation using Puppeteer.
 
 ![Astro](https://img.shields.io/badge/Astro-5.x-orange)
-![Playwright](https://img.shields.io/badge/Playwright-1.58-green)
+![Puppeteer](https://img.shields.io/badge/Puppeteer-24.x-green)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 
 ![Beast Domain Checker Screenshot](public/screenshot.png)
@@ -48,15 +48,14 @@ Open [http://localhost:6006](http://localhost:6006) in your browser.
 ### Manual Installation
 
 ```bash
-# Install dependencies
+# Install dependencies (Puppeteer will download Chromium automatically)
 npm install
-
-# Install Playwright browser
-npx playwright install chromium
 
 # Start development server
 npm run dev
 ```
+
+> **Note:** Puppeteer automatically downloads a compatible Chromium browser during `npm install`. No additional installation steps required!
 
 ## Usage
 
@@ -84,7 +83,7 @@ Click "Add to Favorites" on any result to save it for later.
 beast-domain-checker/
 ├── src/
 │   ├── lib/
-│   │   ├── domainChecker.ts   # Playwright automation
+│   │   ├── domainChecker.ts   # Puppeteer automation
 │   │   ├── csvParser.ts       # File parsing
 │   │   └── storage.ts         # Data persistence
 │   ├── pages/
@@ -95,6 +94,8 @@ beast-domain-checker/
 │   └── styles/
 │       └── global.css
 ├── public/
+├── Dockerfile                 # Docker image definition
+├── docker-compose.yml         # Docker Compose configuration
 ├── astro.config.mjs
 ├── tailwind.config.mjs
 └── package.json
@@ -103,9 +104,10 @@ beast-domain-checker/
 ## Tech Stack
 
 - [Astro](https://astro.build) - Web framework
-- [Playwright](https://playwright.dev) - Browser automation
+- [Puppeteer](https://pptr.dev) - Headless Chrome automation
 - [Tailwind CSS](https://tailwindcss.com) - Styling
 - [TypeScript](https://typescriptlang.org) - Type safety
+- [Docker](https://docker.com) - Containerization
 
 ## Configuration
 

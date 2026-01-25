@@ -6,9 +6,8 @@ Thank you for your interest in contributing! This document provides guidelines f
 
 1. Fork the repository
 2. Clone your fork locally
-3. Install dependencies: `npm install`
-4. Install Playwright browsers: `npx playwright install chromium`
-5. Start development server: `npm run dev`
+3. Install dependencies: `npm install` (Puppeteer will automatically download Chromium)
+4. Start development server: `npm run dev`
 
 ## Development Workflow
 
