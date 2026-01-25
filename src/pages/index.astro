@@ -943,8 +943,8 @@ const title = "Beast Domain Checker";
               <td class="px-3 sm:px-4 md:px-6 py-3 md:py-4 font-semibold text-primary-500/70 hidden sm:table-cell">${result.price || '--'}</td>
               <td class="px-3 sm:px-4 md:px-6 py-3 md:py-4">
                 ${isInFavorites ? `
-                  <button class="w-full sm:min-w-[80px] px-2 sm:px-3 py-1.5 sm:py-2 bg-primary-500/20 border border-primary-500/50 text-primary-500 text-xs font-bold rounded uppercase cursor-default whitespace-nowrap"
-                          disabled>
+                  <button class="btn-unsave w-full sm:min-w-[80px] px-2 sm:px-3 py-1.5 sm:py-2 bg-primary-500/20 border border-primary-500/50 text-primary-500 text-xs font-bold rounded uppercase hover:bg-red-500/20 hover:text-red-500 hover:border-red-500/50 whitespace-nowrap"
+                          data-domain="${result.domain}">
                     ✓ SAVED
                   </button>
                 ` : `
@@ -964,7 +964,7 @@ const title = "Beast Domain Checker";
         // Add favorite listeners
         document.querySelectorAll('.btn-favorite').forEach(btn => {
           btn.addEventListener('click', (e) => {
-            const button = e.target;
+            const button = e.target as HTMLButtonElement;
             const domainData = {
               domain: button.dataset.domain,
               status: button.dataset.status,
@@ -975,11 +975,22 @@ const title = "Beast Domain Checker";
             const success = addFavorite(domainData);
             
             if (success) {
-              button.textContent = '✓ SAVED';
-              button.classList.remove('bg-primary-500', 'text-black', 'hover:bg-primary-400', 'border-transparent');
-              button.classList.add('bg-primary-500/20', 'border-primary-500/50', 'text-primary-500', 'cursor-default');
-              button.disabled = true;
-              updateFavoritesDisplay(); // Update favorites tab
+              // Refresh the results display to update button states
+              displayResults({ results: currentResults });
+            }
+          });
+        });
+        
+        // Add unsave listeners
+        document.querySelectorAll('.btn-unsave').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const button = e.target as HTMLButtonElement;
+            const domain = button.dataset.domain;
+            
+            if (domain) {
+              removeFavorite(domain);
+              // Refresh the results display to update button states
+              displayResults({ results: currentResults });
             }
           });
         });
