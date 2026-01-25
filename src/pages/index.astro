@@ -19,16 +19,16 @@ const title = "Beast Domain Checker";
   <div class="max-w-7xl mx-auto">
     
     <!-- Header -->
-    <header class="relative overflow-hidden bg-dark-500 border border-primary-500/30 rounded-lg p-8 mb-8 glow-border">
+    <header class="relative overflow-hidden bg-dark-500 border border-primary-500/30 rounded-lg p-4 sm:p-6 md:p-8 mb-4 sm:mb-6 md:mb-8 glow-border">
       <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary-500 to-transparent"></div>
       <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary-500/50 to-transparent"></div>
-      <h1 class="text-3xl md:text-5xl font-bold text-center mb-3 text-primary-500 glow-text tracking-wider">
+      <h1 class="text-xl sm:text-2xl md:text-3xl lg:text-5xl font-bold text-center mb-2 sm:mb-3 text-primary-500 glow-text tracking-wider break-words">
         [ BEAST_DOMAIN_CHECKER ]
       </h1>
-      <p class="text-center text-primary-500/60 text-sm md:text-base font-medium">
+      <p class="text-center text-primary-500/60 text-xs sm:text-sm md:text-base font-medium">
         <span class="text-primary-500">$</span> bulk domain availability scanner <span class="cursor-blink"></span>
       </p>
-      <a href="https://www.namecheap.com" target="_blank" rel="noopener" class="mt-4 inline-flex items-center justify-center gap-2 text-xs text-primary-500/50 hover:text-primary-500 mx-auto block text-center">
+      <a href="https://www.namecheap.com" target="_blank" rel="noopener" class="mt-3 sm:mt-4 inline-flex items-center justify-center gap-2 text-xs text-primary-500/50 hover:text-primary-500 mx-auto block text-center">
         powered by <span class="text-primary-500/70 font-semibold">Namecheap</span> <span class="text-xs">↗</span>
       </a>
     </header>
@@ -40,46 +40,46 @@ const title = "Beast Domain Checker";
       <div class="border-b border-primary-500/20 bg-dark-600">
         <nav class="flex -mb-px" role="tablist">
           <button
-            class="main-tab flex-1 px-6 py-4 text-sm md:text-base font-semibold uppercase tracking-wider border-b-2 border-transparent hover:text-primary-500 hover:border-primary-500/50"
+            class="main-tab flex-1 px-3 sm:px-4 md:px-6 py-3 md:py-4 text-xs sm:text-sm md:text-base font-semibold uppercase tracking-wider border-b-2 border-transparent hover:text-primary-500 hover:border-primary-500/50"
             data-tab="check"
             role="tab"
           >
-            ./check
+            <span class="hidden sm:inline">./</span>check
           </button>
           <button
-            class="main-tab flex-1 px-6 py-4 text-sm md:text-base font-semibold uppercase tracking-wider border-b-2 border-transparent hover:text-primary-500 hover:border-primary-500/50"
+            class="main-tab flex-1 px-3 sm:px-4 md:px-6 py-3 md:py-4 text-xs sm:text-sm md:text-base font-semibold uppercase tracking-wider border-b-2 border-transparent hover:text-primary-500 hover:border-primary-500/50"
             data-tab="favorites"
             role="tab"
           >
-            ./saved
-            <span id="favCount" class="ml-2 px-2 py-0.5 bg-primary-500/20 text-primary-500 border border-primary-500/50 rounded text-xs font-bold">
+            <span class="hidden sm:inline">./</span>saved
+            <span id="favCount" class="ml-1 sm:ml-2 px-1.5 sm:px-2 py-0.5 bg-primary-500/20 text-primary-500 border border-primary-500/50 rounded text-xs font-bold">
               0
             </span>
           </button>
           <button
-            class="main-tab flex-1 px-6 py-4 text-sm md:text-base font-semibold uppercase tracking-wider border-b-2 border-transparent hover:text-primary-500 hover:border-primary-500/50"
+            class="main-tab flex-1 px-3 sm:px-4 md:px-6 py-3 md:py-4 text-xs sm:text-sm md:text-base font-semibold uppercase tracking-wider border-b-2 border-transparent hover:text-primary-500 hover:border-primary-500/50"
             data-tab="results"
             role="tab"
           >
-            ./output
+            <span class="hidden sm:inline">./</span>output
           </button>
         </nav>
       </div>
 
       <!-- Tab Contents -->
-      <div class="p-6 md:p-8 min-h-[500px]">
+      <div class="p-4 sm:p-6 md:p-8 min-h-[400px] sm:min-h-[500px]">
 
         <!-- Check Domains Tab -->
         <div class="main-tab-content" data-tab="check" role="tabpanel">
-          <h2 class="text-xl font-bold mb-6 text-primary-500">$ ./check_domains</h2>
+          <h2 class="text-lg sm:text-xl font-bold mb-4 sm:mb-6 text-primary-500">$ ./check_domains</h2>
           
           <!-- Sub Tabs for Input Methods -->
           <div class="mb-6">
-            <div class="flex gap-2 border-b border-dark-200 mb-6">
-              <button class="input-tab px-4 py-2 text-sm font-semibold border-b-2 transition-all" data-input="upload">
+            <div class="flex gap-2 border-b border-dark-200 mb-4 sm:mb-6">
+              <button class="input-tab px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold border-b-2 transition-all" data-input="upload">
                 <span class="text-primary-500">[</span> UPLOAD <span class="text-primary-500">]</span>
               </button>
-              <button class="input-tab px-4 py-2 text-sm font-semibold border-b-2 transition-all" data-input="paste">
+              <button class="input-tab px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold border-b-2 transition-all" data-input="paste">
                 <span class="text-primary-500">[</span> PASTE <span class="text-primary-500">]</span>
               </button>
             </div>
@@ -112,18 +112,18 @@ const title = "Beast Domain Checker";
                 <p class="mt-4 text-xs text-primary-500/70">// enter one domain per line with extension</p>
               </div>
 
-              <div class="flex gap-3">
+              <div class="flex flex-col sm:flex-row gap-3">
                 <button
                   type="submit"
                   id="submitBtn"
-                  class="flex-1 bg-primary-500 text-black font-bold py-4 px-6 rounded border border-primary-400 uppercase tracking-wider hover:bg-primary-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="flex-1 bg-primary-500 text-black font-bold py-3 sm:py-4 px-4 sm:px-6 rounded border border-primary-400 uppercase tracking-wider text-sm sm:text-base hover:bg-primary-400 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <span class="mr-2">$</span>execute --scan
+                  <span class="mr-2">$</span><span class="hidden sm:inline">execute --</span>scan
                 </button>
                 <button
                   type="button"
                   id="clearInputBtn"
-                  class="hidden px-6 py-4 bg-transparent border border-red-500/50 text-red-500 font-bold rounded uppercase tracking-wider hover:bg-red-500/20 hover:border-red-500"
+                  class="hidden px-4 sm:px-6 py-3 sm:py-4 bg-transparent border border-red-500/50 text-red-500 font-bold rounded uppercase tracking-wider text-sm sm:text-base hover:bg-red-500/20 hover:border-red-500"
                 >
                   reset
                 </button>
@@ -134,10 +134,27 @@ const title = "Beast Domain Checker";
 
         <!-- Favorites Tab -->
         <div class="main-tab-content hidden" data-tab="favorites" role="tabpanel">
-          <h2 class="text-xl font-bold mb-6 text-primary-500">$ ./saved_domains</h2>
+          <div class="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 class="text-lg sm:text-xl font-bold text-primary-500">$ ./saved_domains</h2>
+            <div id="favoritesPagination" class="hidden flex items-center gap-2">
+              <button id="favPrevBtn" class="px-3 py-1 bg-dark-600 border border-primary-500/30 text-primary-500 text-sm font-bold rounded hover:bg-primary-500/10 disabled:opacity-30 disabled:cursor-not-allowed">
+                ←
+              </button>
+              <span id="favPageInfo" class="text-sm text-primary-500/70 font-mono"></span>
+              <button id="favNextBtn" class="px-3 py-1 bg-dark-600 border border-primary-500/30 text-primary-500 text-sm font-bold rounded hover:bg-primary-500/10 disabled:opacity-30 disabled:cursor-not-allowed">
+                →
+              </button>
+            </div>
+          </div>
           <div id="favoritesContainer">
             <!-- Populated by JavaScript -->
           </div>
+          <button
+            id="exportFavoritesBtn"
+            class="hidden mt-6 w-full bg-transparent border border-primary-500/50 text-primary-500 font-bold py-3 sm:py-4 px-4 sm:px-6 rounded uppercase tracking-wider text-sm sm:text-base hover:bg-primary-500/10 hover:border-primary-500"
+          >
+            $ export --format=csv
+          </button>
         </div>
 
         <!-- Results Tab -->
@@ -156,13 +173,13 @@ const title = "Beast Domain Checker";
 
             <!-- Results Table -->
             <div class="overflow-x-auto bg-dark-600 rounded border border-primary-500/20">
-              <table class="w-full text-sm">
+              <table class="w-full text-xs sm:text-sm">
                 <thead class="bg-dark-500 border-b border-primary-500/30">
                   <tr>
-                    <th class="px-6 py-4 text-left font-bold text-primary-500 uppercase tracking-wider text-xs">DOMAIN</th>
-                    <th class="px-6 py-4 text-left font-bold text-primary-500 uppercase tracking-wider text-xs">STATUS</th>
-                    <th class="px-6 py-4 text-left font-bold text-primary-500 uppercase tracking-wider text-xs">PRICE</th>
-                    <th class="px-6 py-4 text-left font-bold text-primary-500 uppercase tracking-wider text-xs">ACTION</th>
+                    <th class="px-3 sm:px-4 md:px-6 py-3 md:py-4 text-left font-bold text-primary-500 uppercase tracking-wider text-xs">DOMAIN</th>
+                    <th class="px-3 sm:px-4 md:px-6 py-3 md:py-4 text-left font-bold text-primary-500 uppercase tracking-wider text-xs">STATUS</th>
+                    <th class="px-3 sm:px-4 md:px-6 py-3 md:py-4 text-left font-bold text-primary-500 uppercase tracking-wider text-xs hidden sm:table-cell">PRICE</th>
+                    <th class="px-3 sm:px-4 md:px-6 py-3 md:py-4 text-left font-bold text-primary-500 uppercase tracking-wider text-xs">ACTION</th>
                   </tr>
                 </thead>
                 <tbody id="resultsBody" class="divide-y divide-primary-500/10"></tbody>
@@ -191,6 +208,8 @@ const title = "Beast Domain Checker";
 
   <script>
     let currentResults = [];
+    let favCurrentPage = 1;
+    const favItemsPerPage = 12; // 3x4 or 4x3 grid
 
     // ===== localStorage Management =====
     const STORAGE_KEYS = {
@@ -343,6 +362,11 @@ const title = "Beast Domain Checker";
       const favorites = getFavorites();
       const container = document.getElementById('favoritesContainer');
       const countBadge = document.getElementById('favCount');
+      const exportFavBtn = document.getElementById('exportFavoritesBtn');
+      const pagination = document.getElementById('favoritesPagination');
+      const pageInfo = document.getElementById('favPageInfo');
+      const prevBtn = document.getElementById('favPrevBtn');
+      const nextBtn = document.getElementById('favNextBtn');
       
       if (countBadge) {
         countBadge.textContent = favorites.length;
@@ -358,12 +382,33 @@ const title = "Beast Domain Checker";
             <p class="text-sm text-primary-500/70">$ scan domains and save favorites</p>
           </div>
         `;
+        if (exportFavBtn) exportFavBtn.classList.add('hidden');
+        if (pagination) pagination.classList.add('hidden');
         return;
+      }
+
+      // Show export button when there are favorites
+      if (exportFavBtn) exportFavBtn.classList.remove('hidden');
+
+      // Calculate pagination
+      const totalPages = Math.ceil(favorites.length / favItemsPerPage);
+      const startIdx = (favCurrentPage - 1) * favItemsPerPage;
+      const endIdx = startIdx + favItemsPerPage;
+      const paginatedFavorites = favorites.slice(startIdx, endIdx);
+
+      // Show/hide pagination
+      if (totalPages > 1) {
+        if (pagination) pagination.classList.remove('hidden');
+        if (pageInfo) pageInfo.textContent = `${favCurrentPage}/${totalPages}`;
+        if (prevBtn) prevBtn.disabled = favCurrentPage === 1;
+        if (nextBtn) nextBtn.disabled = favCurrentPage === totalPages;
+      } else {
+        if (pagination) pagination.classList.add('hidden');
       }
 
       container.innerHTML = `
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          ${favorites.map(fav => {
+          ${paginatedFavorites.map(fav => {
             const namecheapUrl = `https://www.namecheap.com/domains/registration/results/?domain=${encodeURIComponent(fav.domain)}`;
             return `
             <div class="relative bg-dark-600 border rounded p-5 hover:border-primary-500/50 ${
@@ -423,6 +468,14 @@ const title = "Beast Domain Checker";
       updateFavoritesDisplay();
       restoreInput();
 
+      // Initialize tabs from URL FIRST (before any auto-switches)
+      const initialTab = getQueryParam('tab') || '';
+      const initialInput = getQueryParam('input') || 'upload';
+      
+      // Validate tab name exists
+      const validTabs = ['check', 'favorites', 'results'];
+      const hasValidTabParam = validTabs.includes(initialTab);
+
       // Load saved results if they exist
       const savedResults = getSavedResults();
       if (savedResults && savedResults.results && savedResults.results.length > 0) {
@@ -430,9 +483,28 @@ const title = "Beast Domain Checker";
         currentResults = savedResults.results;
         displayResults({ results: savedResults.results });
 
-        // Auto-switch to results tab
-        activateMainTab('results');
+        // Auto-switch to results tab ONLY if no valid tab specified in URL
+        if (!hasValidTabParam) {
+          activateMainTab('results');
+        }
       }
+
+      // Favorites pagination handlers
+      document.getElementById('favPrevBtn')?.addEventListener('click', () => {
+        if (favCurrentPage > 1) {
+          favCurrentPage--;
+          updateFavoritesDisplay();
+        }
+      });
+
+      document.getElementById('favNextBtn')?.addEventListener('click', () => {
+        const favorites = getFavorites();
+        const totalPages = Math.ceil(favorites.length / favItemsPerPage);
+        if (favCurrentPage < totalPages) {
+          favCurrentPage++;
+          updateFavoritesDisplay();
+        }
+      });
 
       // Clear button handler
       document.getElementById('clearInputBtn')?.addEventListener('click', () => {
@@ -484,6 +556,11 @@ const title = "Beast Domain Checker";
       }
       if (content) content.classList.remove('hidden');
       if (updateUrl) setQueryParam('tab', tabName);
+      
+      // Refresh favorites display when favorites tab is activated
+      if (tabName === 'favorites') {
+        updateFavoritesDisplay();
+      }
     }
 
     mainTabs.forEach(tab => {
@@ -523,7 +600,12 @@ const title = "Beast Domain Checker";
     // Initialize tabs from URL or defaults
     const initialTab = getQueryParam('tab') || 'check';
     const initialInput = getQueryParam('input') || 'upload';
-    activateMainTab(initialTab, false);
+    
+    // Validate tab name exists
+    const validTabs = ['check', 'favorites', 'results'];
+    const validTab = validTabs.includes(initialTab) ? initialTab : 'check';
+    
+    activateMainTab(validTab, false);
     activateInputTab(initialInput, false);
 
     // File upload
@@ -685,14 +767,15 @@ const title = "Beast Domain Checker";
 
           return `
             <tr class="hover:bg-primary-500/5">
-              <td class="px-6 py-4">
-                <a href="${namecheapUrl}" target="_blank" rel="noopener" class="font-bold text-primary-500 hover:underline flex items-center gap-2">
-                  ${result.domain}
-                  <span class="text-primary-500/50 text-xs">↗</span>
+              <td class="px-3 sm:px-4 md:px-6 py-3 md:py-4">
+                <a href="${namecheapUrl}" target="_blank" rel="noopener" class="font-bold text-primary-500 hover:underline flex items-center gap-1 sm:gap-2 break-all">
+                  <span class="truncate max-w-[150px] sm:max-w-none">${result.domain}</span>
+                  <span class="text-primary-500/50 text-xs flex-shrink-0">↗</span>
                 </a>
+                <div class="sm:hidden mt-1 text-xs font-semibold text-primary-500/70">${result.price || '--'}</div>
               </td>
-              <td class="px-6 py-4">
-                <span class="px-2 py-1 text-xs font-bold uppercase rounded ${
+              <td class="px-3 sm:px-4 md:px-6 py-3 md:py-4">
+                <span class="px-2 py-1 text-xs font-bold uppercase rounded whitespace-nowrap ${
                   result.status === 'available' ? 'bg-primary-500/10 text-primary-500 border border-primary-500/50' :
                   result.status === 'premium' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/50' :
                   'bg-red-500/10 text-red-500 border border-red-500/50'
@@ -700,15 +783,15 @@ const title = "Beast Domain Checker";
                   ${result.status === 'error' ? 'taken' : result.status}
                 </span>
               </td>
-              <td class="px-6 py-4 font-semibold text-primary-500/70">${result.price || '--'}</td>
-              <td class="px-6 py-4">
+              <td class="px-3 sm:px-4 md:px-6 py-3 md:py-4 font-semibold text-primary-500/70 hidden sm:table-cell">${result.price || '--'}</td>
+              <td class="px-3 sm:px-4 md:px-6 py-3 md:py-4">
                 ${isInFavorites ? `
-                  <button class="min-w-[80px] px-3 py-2 bg-primary-500/20 border border-primary-500/50 text-primary-500 text-xs font-bold rounded uppercase cursor-default"
+                  <button class="w-full sm:min-w-[80px] px-2 sm:px-3 py-1.5 sm:py-2 bg-primary-500/20 border border-primary-500/50 text-primary-500 text-xs font-bold rounded uppercase cursor-default whitespace-nowrap"
                           disabled>
                     ✓ SAVED
                   </button>
                 ` : `
-                  <button class="btn-favorite min-w-[80px] px-3 py-2 bg-primary-500 border border-transparent text-black text-xs font-bold rounded uppercase hover:bg-primary-400"
+                  <button class="btn-favorite w-full sm:min-w-[80px] px-2 sm:px-3 py-1.5 sm:py-2 bg-primary-500 border border-transparent text-black text-xs font-bold rounded uppercase hover:bg-primary-400 whitespace-nowrap"
                           data-domain="${result.domain}"
                           data-status="${result.status}"
                           data-price="${result.price || ''}"
@@ -790,6 +873,31 @@ const title = "Beast Domain Checker";
       const a = document.createElement('a');
       a.href = url;
       a.download = `domains-${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Export Favorites
+    document.getElementById('exportFavoritesBtn')?.addEventListener('click', () => {
+      const favorites = getFavorites();
+      if (favorites.length === 0) return;
+
+      const csv = [
+        ['Domain', 'Status', 'Available', 'Price', 'Saved Date'],
+        ...favorites.map(f => [
+          f.domain,
+          f.status,
+          f.available ? 'Yes' : 'No',
+          f.price || 'N/A',
+          new Date(f.addedAt).toLocaleDateString()
+        ])
+      ].map(row => row.join(',')).join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `favorites-${Date.now()}.csv`;
       a.click();
       URL.revokeObjectURL(url);
     });
