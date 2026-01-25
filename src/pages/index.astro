@@ -389,7 +389,7 @@ const title = "Beast Domain Checker";
                   fav.status === 'premium' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/50' :
                   'bg-red-500/10 text-red-500 border border-red-500/50'
                 }">
-                  ${fav.status}
+                  ${fav.status === 'error' ? 'unavailable' : fav.status}
                 </span>
               </div>
 
@@ -697,18 +697,18 @@ const title = "Beast Domain Checker";
                   result.status === 'premium' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/50' :
                   'bg-red-500/10 text-red-500 border border-red-500/50'
                 }">
-                  ${result.status}
+                  ${result.status === 'error' ? 'unavailable' : result.status}
                 </span>
               </td>
               <td class="px-6 py-4 font-semibold text-primary-500/70">${result.price || '--'}</td>
               <td class="px-6 py-4">
                 ${isInFavorites ? `
-                  <button class="px-3 py-2 bg-transparent border border-primary-500/30 text-primary-500/50 text-xs font-bold rounded uppercase cursor-not-allowed"
+                  <button class="min-w-[80px] px-3 py-2 bg-primary-500/20 border border-primary-500/50 text-primary-500 text-xs font-bold rounded uppercase cursor-default"
                           disabled>
-                    [SAVED]
+                    ✓ SAVED
                   </button>
                 ` : `
-                  <button class="btn-favorite px-3 py-2 bg-primary-500 text-black text-xs font-bold rounded uppercase hover:bg-primary-400"
+                  <button class="btn-favorite min-w-[80px] px-3 py-2 bg-primary-500 border border-transparent text-black text-xs font-bold rounded uppercase hover:bg-primary-400"
                           data-domain="${result.domain}"
                           data-status="${result.status}"
                           data-price="${result.price || ''}"
@@ -735,9 +735,9 @@ const title = "Beast Domain Checker";
             const success = addFavorite(domainData);
             
             if (success) {
-              button.textContent = '✓ Already Added';
-              button.classList.remove('bg-gradient-to-r', 'from-primary-500', 'to-cyan-500', 'text-dark-500', 'hover:shadow-lg');
-              button.classList.add('bg-gray-600', 'text-gray-300', 'opacity-60', 'cursor-not-allowed');
+              button.textContent = '✓ SAVED';
+              button.classList.remove('bg-primary-500', 'text-black', 'hover:bg-primary-400', 'border-transparent');
+              button.classList.add('bg-primary-500/20', 'border-primary-500/50', 'text-primary-500', 'cursor-default');
               button.disabled = true;
               updateFavoritesDisplay(); // Update favorites tab
             }
