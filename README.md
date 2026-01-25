@@ -139,6 +139,10 @@ npm run cli -- --help
 
 #### Example Output
 
+![CLI Screenshot](public/cli-screenshot.png)
+
+Real-time hacker-style logs with color-coded output:
+
 ```
 ╔═══════════════════════════════════════════════════════╗
 ║        DOMAIN CHECKER - CLI MODE v1.0.0              ║
