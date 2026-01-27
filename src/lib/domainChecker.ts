@@ -362,10 +362,10 @@ export class NamecheapBeastModeChecker {
 
           // Check for "Add to cart" (available)
           if (textLower.includes("add to cart")) {
-            const priceMatch = text?.match(/€([\d,]+\.?\d*)/);
-            const price = priceMatch ? `€${priceMatch[1]}` : undefined;
+            const priceMatch = text?.match(/([$€£])([\d,]+\.?\d*)/);
+            const price = priceMatch ? `${priceMatch[1]}${priceMatch[2]}` : undefined;
             const priceValue = price
-              ? parseFloat(price.replace("€", "").replace(",", ""))
+              ? parseFloat(price.replace(/[$€£,]/g, ""))
               : 0;
 
             return {
@@ -377,11 +377,11 @@ export class NamecheapBeastModeChecker {
           }
 
           // Has price but no "add to cart" button
-          const priceMatch = text?.match(/€([\d,]+\.?\d*)/);
+          const priceMatch = text?.match(/([$€£])([\d,]+\.?\d*)/);
           if (priceMatch) {
-            const price = `€${priceMatch[1]}`;
+            const price = `${priceMatch[1]}${priceMatch[2]}`;
             const priceValue = parseFloat(
-              price.replace("€", "").replace(",", "")
+              price.replace(/[$€£,]/g, "")
             );
 
             return {

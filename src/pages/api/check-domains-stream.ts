@@ -35,17 +35,30 @@ export const POST: APIRoute = async ({ request }) => {
     const stream = new ReadableStream({
       async start(controller) {
         const encoder = new TextEncoder();
-        
+        let isClosed = false;
+
         // Helper function to send SSE message
         const sendEvent = (type: string, data: any) => {
-          const message = `event: ${type}\ndata: ${JSON.stringify(data)}\n\n`;
-          controller.enqueue(encoder.encode(message));
+          if (isClosed) return;
+          try {
+            const message = `event: ${type}\ndata: ${JSON.stringify(data)}\n\n`;
+            controller.enqueue(encoder.encode(message));
+          } catch {
+            isClosed = true;
+          }
+        };
+
+        const closeController = () => {
+          if (!isClosed) {
+            isClosed = true;
+            controller.close();
+          }
         };
 
         try {
           // Initialize checker with real-time log callback
           const checker = new NamecheapBeastModeChecker();
-          
+
           // Set up log callback to stream logs in real-time
           checker.setLogCallback((message, type = 'info') => {
             sendEvent('log', { message, type, timestamp: Date.now() });
@@ -75,13 +88,13 @@ export const POST: APIRoute = async ({ request }) => {
           });
 
           sendEvent('done', { message: 'Scan complete' });
-          controller.close();
+          closeController();
 
         } catch (error) {
           sendEvent('error', {
             message: error instanceof Error ? error.message : 'Unknown error occurred'
           });
-          controller.close();
+          closeController();
         }
       }
     });

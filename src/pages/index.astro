@@ -409,7 +409,9 @@ const title = "Beast Domain Checker";
     }
 
     function updateFavoritesDisplay() {
-      const favorites = getFavorites();
+      const favorites = getFavorites().sort((a, b) =>
+        new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime()
+      );
       const container = document.getElementById('favoritesContainer');
       const countBadge = document.getElementById('favCount');
       const exportFavBtn = document.getElementById('exportFavoritesBtn');
@@ -505,7 +507,8 @@ const title = "Beast Domain Checker";
       // Attach remove listeners
       document.querySelectorAll('.remove-fav-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
-          const domain = e.target.dataset.domain;
+          const button = e.currentTarget as HTMLButtonElement;
+          const domain = button.dataset.domain;
           if (confirm(`Remove ${domain} from favorites?`)) {
             removeFavorite(domain);
           }
@@ -964,7 +967,7 @@ const title = "Beast Domain Checker";
         // Add favorite listeners
         document.querySelectorAll('.btn-favorite').forEach(btn => {
           btn.addEventListener('click', (e) => {
-            const button = e.target as HTMLButtonElement;
+            const button = e.currentTarget as HTMLButtonElement;
             const domainData = {
               domain: button.dataset.domain,
               status: button.dataset.status,
@@ -984,7 +987,7 @@ const title = "Beast Domain Checker";
         // Add unsave listeners
         document.querySelectorAll('.btn-unsave').forEach(btn => {
           btn.addEventListener('click', (e) => {
-            const button = e.target as HTMLButtonElement;
+            const button = e.currentTarget as HTMLButtonElement;
             const domain = button.dataset.domain;
             
             if (domain) {
