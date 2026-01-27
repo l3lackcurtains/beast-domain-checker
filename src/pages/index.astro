@@ -904,8 +904,8 @@ const title = "Beast Domain Checker";
           
           // Within same status, sort by price (cheapest first)
           if (a.price && b.price) {
-            const aPrice = parseFloat(a.price.replace(/[€,]/g, ''));
-            const bPrice = parseFloat(b.price.replace(/[€,]/g, ''));
+            const aPrice = parseFloat(a.price.replace(/[$€£,\s]/g, ''));
+            const bPrice = parseFloat(b.price.replace(/[$€£,\s]/g, ''));
             return aPrice - bPrice;
           }
           
@@ -1026,8 +1026,8 @@ const title = "Beast Domain Checker";
         if (aPriority !== bPriority) return aPriority - bPriority;
         
         if (a.price && b.price) {
-          const aPrice = parseFloat(a.price.replace(/[€,]/g, ''));
-          const bPrice = parseFloat(b.price.replace(/[€,]/g, ''));
+          const aPrice = parseFloat(a.price.replace(/[$€£,\s]/g, ''));
+          const bPrice = parseFloat(b.price.replace(/[$€£,\s]/g, ''));
           return aPrice - bPrice;
         }
         

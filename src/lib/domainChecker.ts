@@ -33,6 +33,53 @@ export class NamecheapBeastModeChecker {
     }
   }
 
+  private async switchToUSD(): Promise<void> {
+    if (!this.page) return;
+
+    try {
+      // Check current currency using the dropdown toggle
+      const currentCurrency = await this.page.evaluate(() => {
+        const toggle = document.querySelector('.gb-dropdown--currency .gb-dropdown__toggle');
+        return toggle?.textContent?.trim() || '';
+      });
+
+      // If already USD, skip
+      if (currentCurrency.includes('$') && currentCurrency.includes('USD')) {
+        this.log('✓ Currency already set to USD', 'success');
+        return;
+      }
+
+      this.log('💱 Switching currency to USD...', 'info');
+
+      // Click the currency dropdown toggle to open it
+      await this.page.evaluate(() => {
+        const toggle = document.querySelector('.gb-dropdown--currency .gb-dropdown__toggle') as HTMLElement;
+        if (toggle) toggle.click();
+      });
+
+      await delay(500);
+
+      // Click the USD option using data-ncid attribute
+      const switched = await this.page.evaluate(() => {
+        const usdOption = document.querySelector('[data-ncid="currency-USD"]') as HTMLElement;
+        if (usdOption) {
+          usdOption.click();
+          return true;
+        }
+        return false;
+      });
+
+      if (switched) {
+        await delay(2000); // Wait for page to update with new currency
+        this.log('✓ Currency switched to USD', 'success');
+      } else {
+        this.log('⚠ Could not switch to USD, continuing with current currency', 'info');
+      }
+    } catch (e) {
+      this.log(`⚠ Currency switch failed: ${e}`, 'info');
+    }
+  }
+
   async init() {
     this.browser = await puppeteer.launch({
       headless: true,
@@ -73,6 +120,9 @@ export class NamecheapBeastModeChecker {
 
       await delay(5000);
       this.log("✓ Connection established. Interface ready.", 'success');
+
+      // Switch to USD currency if not already selected
+      await this.switchToUSD();
 
       const batchSize = 1000; // Namecheap Beast Mode supports up to 1000 domains
       for (let i = 0; i < domains.length; i += batchSize) {
@@ -252,23 +302,30 @@ export class NamecheapBeastModeChecker {
         this.page.waitForSelector(".results-beast__error", { timeout: 30000 }),
       ]).catch(() => {});
 
-      // Wait for all domain cards to finish loading
+      // Wait for all domain cards to finish loading (using strong selectors)
       await this.page.waitForFunction(() => {
-        const articles = document.querySelectorAll('article');
-        if (articles.length === 0) return false;
-        const loadingArticles = Array.from(articles).filter(article => {
+        // Check for loaded articles (not empty placeholders)
+        const loadedArticles = document.querySelectorAll('article:not(.domain-empty)');
+        if (loadedArticles.length === 0) return false;
+        
+        // Check if articles have finished loading content
+        const stillLoading = Array.from(loadedArticles).filter(article => {
           const hasSkeleton = article.querySelector('[class*="skeleton"], [class*="placeholder"]');
           const hasSpinner = article.querySelector('[class*="loading"], [class*="spinner"]');
           const hasDomainName = article.querySelector('h2');
+          // Check for price element or status indicators
+          const hasPriceElement = article.querySelector('.gb-label--price');
           const hasStatusContent = article.textContent && (
             article.textContent.includes('Add to cart') ||
             article.textContent.includes('TAKEN') ||
             article.textContent.includes('Make offer') ||
-            article.textContent.includes('€')
+            article.textContent.includes('$') ||
+            article.textContent.includes('€') ||
+            article.textContent.includes('£')
           );
-          return hasSkeleton || hasSpinner || !hasDomainName || !hasStatusContent;
+          return hasSkeleton || hasSpinner || !hasDomainName || (!hasPriceElement && !hasStatusContent);
         });
-        return loadingArticles.length === 0;
+        return stillLoading.length === 0;
       }, { timeout: 60000, polling: 1000 }).catch(() => {});
 
       await delay(2000);
@@ -332,7 +389,8 @@ export class NamecheapBeastModeChecker {
       throw new Error("Page not initialized");
     }
 
-    const articles = await this.page.$$("article");
+    // Use strong selectors: article:not(.domain-empty) for loaded results
+    const articles = await this.page.$$("article:not(.domain-empty)");
     const domainLower = domain.toLowerCase();
 
     for (const article of articles) {
@@ -360,12 +418,32 @@ export class NamecheapBeastModeChecker {
             };
           }
 
+          // Try to extract price using the .gb-label--price selector first
+          let price: string | undefined;
+          const priceElement = await article.$('.gb-label--price');
+          if (priceElement) {
+            const priceText = await priceElement.evaluate((el) => el.textContent);
+            if (priceText) {
+              // Extract price with currency symbol
+              const priceMatch = priceText.match(/([$€£])\s*([\d,]+\.?\d*)/);
+              if (priceMatch) {
+                price = `${priceMatch[1]}${priceMatch[2]}`;
+              }
+            }
+          }
+
+          // Fallback: try to extract price from full text content
+          if (!price) {
+            const priceMatch = text?.match(/([$€£])\s*([\d,]+\.?\d*)/);
+            if (priceMatch) {
+              price = `${priceMatch[1]}${priceMatch[2]}`;
+            }
+          }
+
           // Check for "Add to cart" (available)
           if (textLower.includes("add to cart")) {
-            const priceMatch = text?.match(/([$€£])([\d,]+\.?\d*)/);
-            const price = priceMatch ? `${priceMatch[1]}${priceMatch[2]}` : undefined;
             const priceValue = price
-              ? parseFloat(price.replace(/[$€£,]/g, ""))
+              ? parseFloat(price.replace(/[$€£,\s]/g, ""))
               : 0;
 
             return {
@@ -376,13 +454,9 @@ export class NamecheapBeastModeChecker {
             };
           }
 
-          // Has price but no "add to cart" button
-          const priceMatch = text?.match(/([$€£])([\d,]+\.?\d*)/);
-          if (priceMatch) {
-            const price = `${priceMatch[1]}${priceMatch[2]}`;
-            const priceValue = parseFloat(
-              price.replace(/[$€£,]/g, "")
-            );
+          // Has price but no explicit "add to cart" button (still available)
+          if (price) {
+            const priceValue = parseFloat(price.replace(/[$€£,\s]/g, ""));
 
             return {
               domain,
