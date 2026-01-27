@@ -313,8 +313,8 @@ export class NamecheapBeastModeChecker {
           const hasSkeleton = article.querySelector('[class*="skeleton"], [class*="placeholder"]');
           const hasSpinner = article.querySelector('[class*="loading"], [class*="spinner"]');
           const hasDomainName = article.querySelector('h2');
-          // Check for price element or status indicators
-          const hasPriceElement = article.querySelector('.gb-label--price');
+          // Check for price element (new selector: .price strong, old: .gb-label--price) or status indicators
+          const hasPriceElement = article.querySelector('.price strong') || article.querySelector('.gb-label--price');
           const hasStatusContent = article.textContent && (
             article.textContent.includes('Add to cart') ||
             article.textContent.includes('TAKEN') ||
@@ -418,13 +418,13 @@ export class NamecheapBeastModeChecker {
             };
           }
 
-          // Try to extract price using the .gb-label--price selector first
+          // Try to extract price using the .price strong selector (primary location)
           let price: string | undefined;
-          const priceElement = await article.$('.gb-label--price');
-          if (priceElement) {
-            const priceText = await priceElement.evaluate((el) => el.textContent);
+          const priceStrong = await article.$('.price strong');
+          if (priceStrong) {
+            const priceText = await priceStrong.evaluate((el) => el.textContent);
             if (priceText) {
-              // Extract price with currency symbol
+              // Extract price with currency symbol (format: $12.98/yr)
               const priceMatch = priceText.match(/([$€£])\s*([\d,]+\.?\d*)/);
               if (priceMatch) {
                 price = `${priceMatch[1]}${priceMatch[2]}`;
@@ -432,7 +432,21 @@ export class NamecheapBeastModeChecker {
             }
           }
 
-          // Fallback: try to extract price from full text content
+          // Fallback: try .gb-label--price (older interface version)
+          if (!price) {
+            const priceElement = await article.$('.gb-label--price');
+            if (priceElement) {
+              const priceText = await priceElement.evaluate((el) => el.textContent);
+              if (priceText) {
+                const priceMatch = priceText.match(/([$€£])\s*([\d,]+\.?\d*)/);
+                if (priceMatch) {
+                  price = `${priceMatch[1]}${priceMatch[2]}`;
+                }
+              }
+            }
+          }
+
+          // Last fallback: try to extract price from full text content
           if (!price) {
             const priceMatch = text?.match(/([$€£])\s*([\d,]+\.?\d*)/);
             if (priceMatch) {

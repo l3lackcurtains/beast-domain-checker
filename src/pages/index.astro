@@ -529,18 +529,26 @@ const title = "Beast Domain Checker";
       const validTabs = ['check', 'favorites', 'results'];
       const hasValidTabParam = validTabs.includes(initialTab);
 
-      // Load saved results if they exist
+      // Load saved results if they exist (for display purposes only, don't auto-switch)
       const savedResults = getSavedResults();
       if (savedResults && savedResults.results && savedResults.results.length > 0) {
         console.log('📂 Loading saved results from localStorage');
         currentResults = savedResults.results;
         displayResults({ results: savedResults.results });
-
-        // Auto-switch to results tab ONLY if no valid tab specified in URL
-        if (!hasValidTabParam) {
-          activateMainTab('results');
-        }
       }
+
+      // Activate the correct tab based on URL or default
+      // If URL has a valid tab parameter, use it; otherwise default to 'check' 
+      // (or 'results' if there are saved results)
+      let targetTab = 'check';
+      if (hasValidTabParam) {
+        targetTab = initialTab;
+      } else if (savedResults && savedResults.results && savedResults.results.length > 0) {
+        targetTab = 'results';
+      }
+      
+      activateMainTab(targetTab, false);
+      activateInputTab(initialInput, false);
 
       // Favorites pagination handlers
       document.getElementById('favPrevBtn')?.addEventListener('click', () => {
@@ -649,17 +657,6 @@ const title = "Beast Domain Checker";
         activateInputTab(tab.dataset.input);
       });
     });
-
-    // Initialize tabs from URL or defaults
-    const initialTab = getQueryParam('tab') || 'check';
-    const initialInput = getQueryParam('input') || 'upload';
-    
-    // Validate tab name exists
-    const validTabs = ['check', 'favorites', 'results'];
-    const validTab = validTabs.includes(initialTab) ? initialTab : 'check';
-    
-    activateMainTab(validTab, false);
-    activateInputTab(initialInput, false);
 
     // File upload
     const fileInput = document.getElementById('fileInput');
