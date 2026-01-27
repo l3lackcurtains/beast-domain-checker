@@ -537,15 +537,8 @@ const title = "Beast Domain Checker";
         displayResults({ results: savedResults.results });
       }
 
-      // Activate the correct tab based on URL or default
-      // If URL has a valid tab parameter, use it; otherwise default to 'check' 
-      // (or 'results' if there are saved results)
-      let targetTab = 'check';
-      if (hasValidTabParam) {
-        targetTab = initialTab;
-      } else if (savedResults && savedResults.results && savedResults.results.length > 0) {
-        targetTab = 'results';
-      }
+      // Activate the correct tab based on URL or default to 'check'
+      const targetTab = hasValidTabParam ? initialTab : 'check';
       
       activateMainTab(targetTab, false);
       activateInputTab(initialInput, false);
