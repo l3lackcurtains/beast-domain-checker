@@ -113,12 +113,20 @@ export class NamecheapBeastModeChecker {
       await this.page.goto(
         "https://www.namecheap.com/domains/registration/results/?type=beast&domain=",
         {
-          waitUntil: "domcontentloaded",
+          waitUntil: "networkidle2",
           timeout: 90000,
         }
       );
 
-      await delay(5000);
+      // Dismiss cookie consent banner if present
+      await this.page.evaluate(() => {
+        const acceptBtn = Array.from(document.querySelectorAll('button')).find(
+          b => b.textContent?.trim() === 'ACCEPT ALL'
+        );
+        if (acceptBtn) (acceptBtn as HTMLButtonElement).click();
+      });
+      await delay(2000);
+
       this.log("✓ Connection established. Interface ready.", 'success');
 
       // Switch to USD currency if not already selected
@@ -167,7 +175,7 @@ export class NamecheapBeastModeChecker {
         await this.page.waitForFunction(() => {
           const buttons = Array.from(document.querySelectorAll('button'));
           return buttons.some(b => b.textContent?.includes('Import CSV file'));
-        }, { timeout: 5000 });
+        }, { timeout: 30000 });
         
         await this.page.evaluate(() => {
           const buttons = Array.from(document.querySelectorAll('button'));
