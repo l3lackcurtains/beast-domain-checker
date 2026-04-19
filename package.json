@@ -4,10 +4,10 @@
   "description": "Bulk domain availability checker powered by Namecheap Beast Mode automation using Puppeteer",
   "type": "module",
   "license": "MIT",
-  "author": "",
+  "author": "l3lackcurtains",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/l3lackcurtains/beast-domain-checker.git"
   },
   "keywords": [
     "domain",
